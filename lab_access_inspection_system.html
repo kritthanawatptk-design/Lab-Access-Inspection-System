@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกการเข้าใช้ห้องปฏิบัติการและตรวจเช็กอุปกรณ์</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Kanit -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- HTML5 QR Code Reader Library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Kanit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+        .tab-active { @apply border-b-2 border-sky-600 text-sky-600 font-semibold; }
+        /* Smooth transitions */
+        .fade-in { animation: fadeIn 0.25s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-sky-500 p-2 rounded-xl text-white shadow">
+                    <i class="fa-solid fa-flask-vial text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">Smart Lab Access</h1>
+                    <p class="text-xs text-slate-400">ระบบเข้าใช้และตรวจเช็กห้องปฏิบัติการ</p>
+                </div>
+            </div>
+            
+            <!-- Room Selector Dropdown -->
+            <div class="flex items-center space-x-2">
+                <select id="roomSelector" onchange="switchRoom(this.value)" class="bg-slate-800 text-slate-100 text-sm border border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-sky-500">
+                    <option value="LAB-EXT">🧪 Extraction Room (ห้องสกัดตัวอย่าง)</option>
+                    <option value="LAB-MMX">🧫 Mastermix Preparation Room (ห้องเตรียมน้ำยา)</option>
+                    <option value="LAB-ADD">🧬 Additive Room (ห้องเติม Template)</option>
+                    <option value="LAB-AMP">🔬 Amplification Room (ห้องเพิ่มสารพันธุกรรม)</option>
+                    <option value="LAB-BSL3">☣️ Biosafety Level 3 Room (ห้อง BSL 3)</option>
+                </select>
+                <button onclick="openAdminModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg text-xs font-medium border border-slate-700 flex items-center gap-1.5 transition-all" title="จัดการผู้มีสิทธิ์ใช้งาน (Admin)">
+                    <i class="fa-solid fa-user-gear text-sky-400"></i>
+                    <span class="hidden sm:inline">จัดการผู้ใช้</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white border-b border-slate-200 shadow-sm sticky top-[60px] z-30">
+        <div class="max-w-5xl mx-auto px-4 flex space-x-8 text-sm">
+            <button onclick="switchView('terminal')" id="nav-terminal" class="py-3 px-1 text-slate-600 hover:text-sky-600 flex items-center gap-2 tab-active transition-all">
+                <i class="fa-solid fa-qrcode"></i> สแกนเข้า/ออกห้อง
+            </button>
+            <button onclick="switchView('active-session')" id="nav-session" class="py-3 px-1 text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all relative">
+                <i class="fa-solid fa-clock-rotate-left"></i> สถานะการใช้งาน
+                <span id="activeBadge" class="hidden absolute -top-1 -right-3 bg-emerald-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">กำลังใช้</span>
+            </button>
+            <button onclick="switchView('logs')" id="nav-logs" class="py-3 px-1 text-slate-600 hover:text-sky-600 flex items-center gap-2 transition-all">
+                <i class="fa-solid fa-clipboard-list"></i> ประวัติ & สถานะอุปกรณ์
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-1 w-full">
+
+        <!-- VIEW 1: TERMINAL / SCAN CHECK-IN -->
+        <section id="view-terminal" class="fade-in space-y-6">
+            <!-- Lab Info Banner -->
+            <div id="roomBanner" class="bg-gradient-to-r from-sky-600 to-indigo-700 text-white p-5 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span class="bg-white/20 text-xs px-2.5 py-1 rounded-full uppercase tracking-wide font-medium">ห้องปฏิบัติการปัจจุบัน</span>
+                    <h2 id="bannerRoomName" class="text-2xl font-bold mt-1">Extraction Room (ห้องสกัดตัวอย่าง)</h2>
+                    <p id="bannerRoomLocation" class="text-xs text-sky-100 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i> อาคารปฏิบัติการตรวจวิเคราะห์ ชั้น 1</p>
+                </div>
+                <div id="roomStatusTag" class="bg-emerald-500/90 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-inner">
+                    <span class="w-2.5 h-2.5 bg-white rounded-full animate-ping"></span>
+                    พร้อมใช้งาน (ว่าง)
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Scanner Card -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center text-center">
+                    <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center text-xl mb-3">
+                        <i class="fa-solid fa-camera-retro"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">สแกน QR Code / บัตรเพื่อเข้าใช้</h3>
+                    <p class="text-xs text-slate-500 mt-1 mb-4">แสดง QR Code ของท่านต่อหน้ากล้อง หรือเลือกผู้ใช้งานทดสอบ</p>
+
+                    <!-- Camera Container or QR Scanner Area -->
+                    <div id="qr-reader" class="w-full max-w-xs bg-slate-900 rounded-xl overflow-hidden border-2 border-dashed border-slate-300 min-h-[220px] flex flex-col items-center justify-center relative">
+                        <div id="scannerPlaceholder" class="p-4 text-slate-400 text-center">
+                            <i class="fa-solid fa-qrcode text-5xl mb-2 text-slate-600"></i>
+                            <p class="text-xs">กดปุ่มด้านล่างเพื่อเปิดกล้องสแกน</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex gap-2 w-full max-w-xs">
+                        <button id="btnToggleCamera" onclick="toggleCameraScanner()" class="flex-1 bg-sky-600 hover:bg-sky-700 text-white text-xs font-medium py-2.5 px-3 rounded-xl transition-all shadow-sm">
+                            <i class="fa-solid fa-video mr-1"></i> เปิดกล้องสแกน
+                        </button>
+                    </div>
+
+                    <!-- Quick Demo Scanner Option -->
+                    <div class="w-full max-w-xs border-t border-slate-100 mt-5 pt-4 text-left">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-semibold text-slate-500">⚡ รายชื่อผู้มีสิทธิ์ใช้งาน (จำลองสแกนด่วน):</label>
+                            <button onclick="openAdminModal()" class="text-[11px] text-sky-600 hover:underline font-medium">
+                                <i class="fa-solid fa-plus-circle"></i> เพิ่มคน
+                            </button>
+                        </div>
+                        <div id="quickScanUsersList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                            <!-- Dynamic Quick Scan Buttons Rendered Here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual Input & Guidelines -->
+                <div class="flex flex-col space-y-6">
+                    <!-- Manual ID Input Card -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-keyboard text-sky-600"></i> หรือ กรอกรหัสประจำตัว
+                        </h3>
+                        <div class="flex gap-2">
+                            <input type="text" id="manualUserId" placeholder="เช่น STD-6501 หรือ 6501234" class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500">
+                            <button onclick="handleManualCheckIn()" class="bg-slate-800 hover:bg-slate-900 text-white font-medium px-4 py-2 rounded-xl text-sm transition-all shadow">
+                                เข้าใช้งาน
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lab Rules / Quick Checklist -->
+                    <div class="bg-slate-100/80 p-5 rounded-2xl border border-slate-200 flex-1">
+                        <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">ข้อปฏิบัติการใช้งานห้องปฏิบัติการ</h4>
+                        <ul class="space-y-2 text-xs text-slate-600">
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+                                <span>สแกนเข้าใช้ห้องทุกครั้งก่อนเริ่มปฏิบัติงาน</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+                                <span>ตรวจเช็กสภาพเครื่องมือและอุปกรณ์ก่อนเริ่มใช้งาน</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+                                <span>เมื่อใช้งานเสร็จแล้ว ต้องกด <b>"บันทึกความพร้อมและลงชื่อออก"</b> ทุกครั้ง</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5"></i>
+                                <span>หากพบอุปกรณ์ชำรุด โปรดระบุลงในระบบทันทีเพื่อแจ้งทีมช่างเทคนิค</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: ACTIVE SESSION & CHECK-OUT FORM -->
+        <section id="view-active-session" class="hidden fade-in space-y-6">
+            <!-- Session Status Header -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl font-bold">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-emerald-100 text-emerald-700 text-xs px-2.5 py-0.5 rounded-full font-semibold">กำลังเข้าใช้งาน</span>
+                            <span id="sessionRoomTag" class="text-xs font-medium text-slate-500">LAB-101</span>
+                        </div>
+                        <h2 id="sessionUserName" class="text-xl font-bold text-slate-800 mt-0.5">นายสมชาย ใจดี</h2>
+                        <p class="text-xs text-slate-500">รหัสผู้ใช้: <span id="sessionUserId">STD-6501</span> | เริ่มต้นเวลา: <span id="sessionStartTime">--:--</span></p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 px-4 py-3 rounded-xl border border-slate-200 text-right w-full md:w-auto">
+                    <p class="text-[11px] text-slate-400 font-medium">ระยะเวลาที่ใช้งานไปแล้ว</p>
+                    <p id="sessionTimer" class="text-2xl font-extrabold text-slate-800 font-mono">00:00:00</p>
+                </div>
+            </div>
+
+            <!-- EQUIPMENT & ROOM CHECKLIST FORM FOR CHECK-OUT -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+                <div class="border-b border-slate-100 pb-4 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">📋 บันทึกความพร้อมการใช้งาน (ก่อนคืนห้อง)</h3>
+                        <p class="text-xs text-slate-500">โปรดตรวจสอบและระบุสถานะความเรียบร้อยของอุปกรณ์และห้องปฏิบัติการ</p>
+                    </div>
+                    <span class="text-xs bg-sky-50 text-sky-700 font-semibold px-3 py-1 rounded-full border border-sky-200">
+                        ขั้นตอนสุดท้าย
+                    </span>
+                </div>
+
+                <!-- Part 1: Room Readiness Checklist -->
+                <div>
+                    <h4 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-broom text-sky-600"></i> 1. ความเรียบร้อยทั่วไปของห้อง
+                    </h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
+                            <input type="checkbox" id="chk-clean" checked class="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+                            <span>เก็บโต๊ะ/ขยะเรียบร้อย</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
+                            <input type="checkbox" id="chk-power" checked class="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+                            <span>ปิดปลั๊กไฟหลัก</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
+                            <input type="checkbox" id="chk-ac" checked class="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+                            <span>ปิดเครื่องปรับอากาศ</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs font-medium text-slate-700">
+                            <input type="checkbox" id="chk-lights" checked class="w-4 h-4 text-sky-600 rounded border-slate-300 focus:ring-sky-500">
+                            <span>ปิดไฟทุกดวง</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Part 2: Equipment Inspection Toggles -->
+                <div>
+                    <h4 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-microscope text-sky-600"></i> 2. สถานะความพร้อมอุปกรณ์ภายในห้อง
+                    </h4>
+                    
+                    <div id="equipmentListContainer" class="space-y-3">
+                        <!-- Dynamic Equipment Items Generated Here -->
+                    </div>
+                </div>
+
+                <!-- Part 3: Additional Notes -->
+                <div>
+                    <label class="text-xs font-bold text-slate-700 block mb-1">ข้อเสนอแนะ / แจ้งปัญหาเพิ่มเติม (ถ้ามี):</label>
+                    <textarea id="checkoutNote" rows="2" placeholder="เช่น เครื่องสเปกโตรโฟโตมิเตอร์ หลอดไฟเตือนขึ้นสีเหลือง..." class="w-full border border-slate-200 rounded-xl p-3 text-xs focus:outline-none focus:border-sky-500"></textarea>
+                </div>
+
+                <!-- Submit Check-out Button -->
+                <div class="pt-2">
+                    <button onclick="submitCheckOut()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket"></i> บันทึกความพร้อมและคืนห้องปฏิบัติการ (Check-out)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: LOGS & EQUIPMENT STATUS HISTORY -->
+        <section id="view-logs" class="hidden fade-in space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">ประวัติการเข้าใช้และรายงานความพร้อม</h2>
+                    <p class="text-xs text-slate-500">ข้อมูลการบันทึกเข้า-ออก และสถานะเครื่องมือล่าสุด</p>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="exportLogsCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 rounded-xl transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-csv text-emerald-600"></i> ส่งออกข้อมูล CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">การเข้าใช้งานวันนี้</p>
+                        <p id="statTotalUse" class="text-xl font-extrabold text-slate-800 mt-0.5">8 ครั้ง</p>
+                    </div>
+                    <div class="w-10 h-10 bg-sky-50 text-sky-600 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-users text-lg"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">อุปกรณ์สมบูรณ์</p>
+                        <p id="statNormalEquip" class="text-xl font-extrabold text-emerald-600 mt-0.5">100%</p>
+                    </div>
+                    <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-circle-check text-lg"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">รายการแจ้งชำรุด/ต้องซ่อม</p>
+                        <p id="statDamagedCount" class="text-xl font-extrabold text-rose-600 mt-0.5">1 รายการ</p>
+                    </div>
+                    <div class="w-10 h-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Table -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <h3 class="text-sm font-bold text-slate-700">บันทึกล่าสุด</h3>
+                    <span class="text-xs text-slate-400">แสดงผล 10 รายการล่าสุด</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] tracking-wider font-semibold">
+                            <tr>
+                                <th class="p-3.5">ผู้เข้าใช้</th>
+                                <th class="p-3.5">ห้องปฏิบัติการ</th>
+                                <th class="p-3.5">เวลา เข้า - ออก</th>
+                                <th class="p-3.5">สภาพห้อง</th>
+                                <th class="p-3.5">สถานะอุปกรณ์</th>
+                                <th class="p-3.5">หมายเหตุ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody" class="divide-y divide-slate-100">
+                            <!-- Dynamic Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Admin User Management -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden fade-in border border-slate-100">
+            <!-- Modal Header -->
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm">จัดการผู้มีสิทธิ์เข้าใช้งาน</h3>
+                        <p class="text-[10px] text-slate-400">ระบบเพิ่ม/จัดการบุคลากรห้องปฏิบัติการ</p>
+                    </div>
+                </div>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-5 space-y-4">
+                <!-- Step 1: Admin Password Verification -->
+                <div id="adminAuthSection" class="space-y-3">
+                    <div class="bg-amber-50 border border-amber-200 text-amber-800 text-xs p-3 rounded-xl flex items-start gap-2">
+                        <i class="fa-solid fa-lock text-amber-600 mt-0.5"></i>
+                        <span>ต้องระบุรหัสผ่านผู้ดูแลระบบ (Admin Password) เพื่อดำเนินการสิทธิ์การจัดการข้อมูล</span>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-700 block mb-1">รหัสผ่านผู้ดูแลระบบ:</label>
+                        <div class="flex gap-2">
+                            <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่าน admin" class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-sky-500">
+                            <button onclick="verifyAdminPassword()" class="bg-sky-600 hover:bg-sky-700 text-white font-medium px-4 py-2 rounded-xl text-xs transition-all shadow-sm">
+                                ยืนยันรหัส
+                            </button>
+                        </div>
+                        <p id="adminAuthError" class="text-rose-500 text-[11px] mt-1 hidden"><i class="fa-solid fa-circle-exclamation"></i> รหัสผ่านไม่ถูกต้อง โปรดลองอีกครั้ง</p>
+                    </div>
+                </div>
+
+                <!-- Step 2: Add New User Form & Current Users List (Hidden until authenticated) -->
+                <div id="adminContentSection" class="hidden space-y-5">
+                    <!-- Add User Form -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h4 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-plus text-sky-600"></i> เพิ่มรายชื่อผู้ใช้งานใหม่
+                        </h4>
+                        <div class="space-y-2">
+                            <div>
+                                <label class="text-[11px] font-medium text-slate-600">รหัสประจำตัว (User ID):</label>
+                                <input type="text" id="newUserId" placeholder="เช่น LABPT-RMSC4-05" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-sky-500 uppercase">
+                            </div>
+                            <div>
+                                <label class="text-[11px] font-medium text-slate-600">ชื่อ - นามสกุล (พร้อมคำนำหน้า):</label>
+                                <input type="text" id="newUserName" placeholder="เช่น นายสมศักดิ์ มั่นคง" class="w-full border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-sky-500">
+                            </div>
+                            <button onclick="addNewUser()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 mt-1">
+                                <i class="fa-solid fa-plus"></i> บันทึกเพิ่มผู้ใช้งาน
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Current Authorized Users List -->
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-700 mb-2 flex justify-between items-center">
+                            <span>รายชื่อผู้มีสิทธิ์ใช้งานปัจจุบัน</span>
+                            <span id="userCountBadge" class="bg-sky-100 text-sky-700 text-[10px] px-2 py-0.5 rounded-full font-semibold">4 ท่าน</span>
+                        </h4>
+                        <div id="adminUsersListContainer" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                            <!-- Dynamic User Items Rendered Here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-700">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+            <div>
+                <p id="toastTitle" class="font-bold text-xs">สำเร็จ</p>
+                <p id="toastMessage" class="text-xs text-slate-300">ทำการบันทึกข้อมูลเรียบร้อยแล้ว</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Room Data & Associated Equipments
+        const roomDatabase = {
+            'LAB-EXT': {
+                name: 'Extraction Room (ห้องสกัดตัวอย่าง)',
+                location: 'อาคารปฏิบัติการตรวจวิเคราะห์ ชั้น 1',
+                equipments: [
+                    { id: 'EQ-EXT-01', name: 'เครื่องสกัดกรดนิวคลีอิกอัตโนมัติ (Automated Nucleic Acid Extractor)', category: 'เครื่องสกัด' },
+                    { id: 'EQ-EXT-02', name: 'ตู้ดูดควันชีวภาพ (Biosafety Cabinet Class II)', category: 'ความปลอดภัย' },
+                    { id: 'EQ-EXT-03', name: 'เครื่องเหวี่ยงสารแบบควบคุมอุณหภูมิ (Refrigerated Centrifuge)', category: 'เครื่องปั่นเหวี่ยง' },
+                    { id: 'EQ-EXT-04', name: 'ชุดไมโครปิเปตต์ (Micro-pipettes Set)', category: 'อุปกรณ์ตวง' }
+                ]
+            },
+            'LAB-MMX': {
+                name: 'Mastermix Preparation Room (ห้องเตรียมน้ำยา)',
+                location: 'อาคารปฏิบัติการตรวจวิเคราะห์ ชั้น 1 (Clean Area)',
+                equipments: [
+                    { id: 'EQ-MMX-01', name: 'ตู้เตรียมสารปลอดเชื้อ (Laminar Flow Hood / Clean Bench)', category: 'ปลอดเชื้อ' },
+                    { id: 'EQ-MMX-02', name: 'ตู้แช่แข็งเก็บสารเคมีและรีเอเจนต์ -20°C', category: 'ความเย็น' },
+                    { id: 'EQ-MMX-03', name: 'เครื่องปั่นผสมสาร (Vortex Mixer)', category: 'เครื่องผสม' },
+                    { id: 'EQ-MMX-04', name: 'ชุดปิเปตต์ชนิด Filter Tip ป้องกันการปนเปื้อน', category: 'อุปกรณ์ตวง' }
+                ]
+            },
+            'LAB-ADD': {
+                name: 'Additive Room (ห้องเติม Template)',
+                location: 'อาคารปฏิบัติการตรวจวิเคราะห์ ชั้น 1',
+                equipments: [
+                    { id: 'EQ-ADD-01', name: 'ตู้เติมสารพันธุกรรมปลอดเชื้อ (PCR Dead Air Box / UV Cabinet)', category: 'ความปลอดภัย' },
+                    { id: 'EQ-ADD-02', name: 'เครื่องหมุนเหวี่ยงสารขนาดเล็ก (Microcentrifuge Spin-down)', category: 'เครื่องปั่นเหวี่ยง' },
+                    { id: 'EQ-ADD-03', name: 'ชุดปิเปตต์ความแม่นยำสูง (Precision Pipette Set)', category: 'อุปกรณ์ตวง' },
+                    { id: 'EQ-ADD-04', name: 'โคมไฟฆ่าเชื้อด้วย UV (UV Decontamination Lamp)', category: 'ฆ่าเชื้อ' }
+                ]
+            },
+            'LAB-AMP': {
+                name: 'Amplification Room (ห้องเพิ่มสารพันธุกรรม)',
+                location: 'อาคารปฏิบัติการตรวจวิเคราะห์ ชั้น 2',
+                equipments: [
+                    { id: 'EQ-AMP-01', name: 'เครื่องวิเคราะห์ Real-Time PCR System', category: 'เครื่องตรวจวิเคราะห์' },
+                    { id: 'EQ-AMP-02', name: 'เครื่องเพิ่มปริมาณสารพันธุกรรม (Thermal Cycler / PCR)', category: 'เครื่องปฏิกิริยา' },
+                    { id: 'EQ-AMP-03', name: 'เครื่องอ่านสัญญาณเรืองแสง (Fluorescence Plate Reader)', category: 'เครื่องวัดผล' },
+                    { id: 'EQ-AMP-04', name: 'คอมพิวเตอร์และระบบประมวลผลผลการทดสอบ (Analysis Workstation)', category: 'ระบบประมวลผล' }
+                ]
+            },
+            'LAB-BSL3': {
+                name: 'Biosafety Level 3 Room (ห้อง BSL 3)',
+                location: 'อาคารปฏิบัติการระดับความปลอดภัยสูง ชั้น 3',
+                equipments: [
+                    { id: 'EQ-BSL-01', name: 'ตู้ชีวอนามัยความปลอดภัยสูง (Biosafety Cabinet Class III)', category: 'ความปลอดภัย BSL-3' },
+                    { id: 'EQ-BSL-02', name: 'ระบบควบคุมแรงดันอากาศลบ (Negative Pressure Controller & HEPA)', category: 'ระบบอากาศ' },
+                    { id: 'EQ-BSL-03', name: 'เครื่องอบนึ่งฆ่าเชื้อด้วยแรงดัน steam (Autoclave High-Pressure Sterilizer)', category: 'ระบบฆ่าเชื้อ' },
+                    { id: 'EQ-BSL-04', name: 'ตู้แช่แข็งรักษาสภาพเชื้อ -80°C (Ultra-Low Temperature Freezer)', category: 'ความเย็นจัด' }
+                ]
+            }
+        };
+
+        // System State
+        let currentRoomId = 'LAB-EXT';
+        let activeSession = null; // Stores current user session if checked-in
+        let timerInterval = null;
+        let html5QrScanner = null;
+        let isAdminAuthenticated = false;
+
+        // Authorized Users Database
+        let authorizedUsers = {
+            'LABPT-RMSC4-01': 'ดร.ภัทรพล วงษ์ภูธร',
+            'LABPT-RMSC4-02': 'นายปัญญ์ปิยะ รอบคอบ',
+            'LABPT-RMSC4-03': 'นางสาวปิยะรัตน์ ชดช้อย',
+            'LABPT-RMSC4-04': 'นายกฤษณ์ธนะวัจน์ ปั้นธนาย์แก้ว'
+        };
+
+        // Inspection State for current session check-out
+        let equipmentStatuses = {}; // { 'EQ-101': 'GOOD' | 'DAMAGED' }
+
+        // Mock Usage Logs
+        let usageLogs = [
+            {
+                id: 'LOG-992',
+                userName: 'ดร.ภัทรพล วงษ์ภูธร',
+                userId: 'LABPT-RMSC4-01',
+                roomId: 'LAB-EXT',
+                checkInTime: '08:30 น.',
+                checkOutTime: '10:00 น.',
+                roomCondition: 'เรียบร้อยดี',
+                equipStatus: 'สมบูรณ์ทุกชิ้น',
+                hasIssue: false,
+                note: 'ปฏิบัติการสกัดสารพันธุกรรมเรียบร้อย'
+            },
+            {
+                id: 'LOG-991',
+                userName: 'นายปัญญ์ปิยะ รอบคอบ',
+                userId: 'LABPT-RMSC4-02',
+                roomId: 'LAB-MMX',
+                checkInTime: '10:15 น.',
+                checkOutTime: '12:30 น.',
+                roomCondition: 'เรียบร้อยดี',
+                equipStatus: 'สมบูรณ์ทุกชิ้น',
+                hasIssue: false,
+                note: '-'
+            },
+            {
+                id: 'LOG-990',
+                userName: 'นางสาวปิยะรัตน์ ชดช้อย',
+                userId: 'LABPT-RMSC4-03',
+                roomId: 'LAB-AMP',
+                checkInTime: '09:00 น.',
+                checkOutTime: '11:00 น.',
+                roomCondition: 'เรียบร้อยดี',
+                equipStatus: 'พบปัญหา (1 ชิ้น)',
+                hasIssue: true,
+                note: 'เครื่อง Real-Time PCR สัญญาณเตือนขัดข้อง'
+            }
+        ];
+
+        window.onload = function() {
+            renderQuickScanButtons();
+            renderEquipmentList();
+            renderLogsTable();
+            updateStats();
+        };
+
+        /* Render Quick Scan Buttons on Main View */
+        function renderQuickScanButtons() {
+            const container = document.getElementById('quickScanUsersList');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const keys = Object.keys(authorizedUsers);
+            keys.forEach((userId, index) => {
+                const userName = authorizedUsers[userId];
+                const btn = document.createElement('button');
+                btn.onclick = () => simulateScan(userId, userName);
+                btn.className = "w-full text-left p-2.5 rounded-xl border border-sky-200 bg-sky-50/70 hover:border-sky-500 hover:bg-sky-100 transition-all text-xs flex justify-between items-center shadow-sm";
+                btn.innerHTML = `
+                    <div>
+                        <p class="font-bold text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-shield text-sky-600"></i> ${userName}
+                        </p>
+                        <p class="text-[11px] text-slate-500">รหัส: ${userId} | บุคลากรประจำห้องปฏิบัติการ</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-sky-600"></i>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        /* Admin Management Functions */
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+            document.getElementById('adminAuthError').classList.add('hidden');
+            
+            if (isAdminAuthenticated) {
+                showAdminContent();
+            } else {
+                document.getElementById('adminAuthSection').classList.remove('hidden');
+                document.getElementById('adminContentSection').classList.add('hidden');
+                document.getElementById('adminPasswordInput').value = '';
+                document.getElementById('adminPasswordInput').focus();
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function verifyAdminPassword() {
+            const passInput = document.getElementById('adminPasswordInput').value;
+            if (passInput === 'Rmsc4_admin') {
+                isAdminAuthenticated = true;
+                document.getElementById('adminAuthError').classList.add('hidden');
+                showToast('สิทธิ์ถูกต้อง', 'ยินดีต้อนรับสู่ระบบจัดการผู้ใช้', 'success');
+                showAdminContent();
+            } else {
+                document.getElementById('adminAuthError').classList.remove('hidden');
+            }
+        }
+
+        function showAdminContent() {
+            document.getElementById('adminAuthSection').classList.add('hidden');
+            document.getElementById('adminContentSection').classList.remove('hidden');
+            renderAdminUsersList();
+        }
+
+        function renderAdminUsersList() {
+            const container = document.getElementById('adminUsersListContainer');
+            const userKeys = Object.keys(authorizedUsers);
+            document.getElementById('userCountBadge').innerText = `${userKeys.length} ท่าน`;
+            container.innerHTML = '';
+
+            userKeys.forEach(userId => {
+                const userName = authorizedUsers[userId];
+                const item = document.createElement('div');
+                item.className = "p-2 bg-slate-100/80 rounded-lg flex justify-between items-center text-xs border border-slate-200/80";
+                item.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-slate-800">${userName}</p>
+                        <p class="text-[10px] text-slate-500 font-mono">${userId}</p>
+                    </div>
+                    <button onclick="deleteUser('${userId}')" class="text-rose-500 hover:text-rose-700 p-1 text-xs" title="ลบผู้ใช้งาน">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function addNewUser() {
+            const idInput = document.getElementById('newUserId').value.trim().toUpperCase();
+            const nameInput = document.getElementById('newUserName').value.trim();
+
+            if (!idInput || !nameInput) {
+                showToast('แจ้งเตือน', 'กรุณากรอกทั้งรหัสประจำตัวและชื่อ-นามสกุล', 'error');
+                return;
+            }
+
+            if (authorizedUsers[idInput]) {
+                showToast('แจ้งเตือน', 'รหัสประจำตัวนี้มีอยู่ในระบบแล้ว', 'error');
+                return;
+            }
+
+            // Add user to database
+            authorizedUsers[idInput] = nameInput;
+
+            // Reset inputs
+            document.getElementById('newUserId').value = '';
+            document.getElementById('newUserName').value = '';
+
+            // Update UI
+            renderAdminUsersList();
+            renderQuickScanButtons();
+
+            showToast('สำเร็จ', `เพิ่มผู้ใช้งาน ${nameInput} เรียบร้อยแล้ว`, 'success');
+        }
+
+        function deleteUser(userId) {
+            const userName = authorizedUsers[userId];
+            delete authorizedUsers[userId];
+            renderAdminUsersList();
+            renderQuickScanButtons();
+            showToast('ลบสำเร็จ', `ลบผู้ใช้งาน ${userName} ออกจากระบบแล้ว`, 'success');
+        }
+
+        function switchRoom(roomId) {
+            if (activeSession) {
+                showToast('แจ้งเตือน', 'กรุณาทำการ Check-out ออกจากห้องปัจจุบันก่อนเปลี่ยนห้อง', 'error');
+                document.getElementById('roomSelector').value = currentRoomId;
+                return;
+            }
+            currentRoomId = roomId;
+            const room = roomDatabase[roomId];
+            document.getElementById('bannerRoomName').innerText = room.name;
+            document.getElementById('bannerRoomLocation').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i> ${room.location}`;
+            renderEquipmentList();
+        }
+
+        function switchView(viewName) {
+            // View sections
+            const terminalView = document.getElementById('view-terminal');
+            const sessionView = document.getElementById('view-active-session');
+            const logsView = document.getElementById('view-logs');
+
+            // Tabs
+            const navTerminal = document.getElementById('nav-terminal');
+            const navSession = document.getElementById('nav-session');
+            const navLogs = document.getElementById('nav-logs');
+
+            // Reset active states
+            [navTerminal, navSession, navLogs].forEach(t => t.classList.remove('tab-active'));
+            [terminalView, sessionView, logsView].forEach(v => v.classList.add('hidden'));
+
+            if (viewName === 'terminal') {
+                terminalView.classList.remove('hidden');
+                navTerminal.classList.add('tab-active');
+            } else if (viewName === 'active-session') {
+                if (!activeSession) {
+                    showToast('ยังไม่มีการเข้าใช้', 'โปรดสแกนเข้าใช้งานห้องปฏิบัติการก่อนครับ', 'error');
+                    terminalView.classList.remove('hidden');
+                    navTerminal.classList.add('tab-active');
+                    return;
+                }
+                sessionView.classList.remove('hidden');
+                navSession.classList.add('tab-active');
+            } else if (viewName === 'logs') {
+                logsView.classList.remove('hidden');
+                navLogs.classList.add('tab-active');
+            }
+        }
+
+        function simulateScan(userId, userName) {
+            processCheckIn(userId, userName);
+        }
+
+        function handleManualCheckIn() {
+            const input = document.getElementById('manualUserId');
+            const val = input.value.trim().toUpperCase();
+            if (!val) {
+                showToast('คำเตือน', 'โปรดกรอกรหัสประจำตัว', 'error');
+                return;
+            }
+            const userName = authorizedUsers[val] || `ผู้ใช้งาน (${val})`;
+            processCheckIn(val, userName);
+            input.value = '';
+        }
+
+        function processCheckIn(userId, userName) {
+            if (activeSession) {
+                showToast('เตือน', 'มีการบันทึกเข้าใช้งานอยู่แล้ว', 'error');
+                switchView('active-session');
+                return;
+            }
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+            activeSession = {
+                userId: userId,
+                userName: userName,
+                roomId: currentRoomId,
+                startTime: now,
+                startTimeStr: timeStr
+            };
+
+            // Update UI elements
+            document.getElementById('sessionUserName').innerText = userName;
+            document.getElementById('sessionUserId').innerText = userId;
+            document.getElementById('sessionRoomTag').innerText = currentRoomId;
+            document.getElementById('sessionStartTime').innerText = timeStr;
+            document.getElementById('activeBadge').classList.remove('hidden');
+
+            // Room status banner update
+            const statusTag = document.getElementById('roomStatusTag');
+            statusTag.className = "bg-rose-500/90 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-inner";
+            statusTag.innerHTML = `<span class="w-2.5 h-2.5 bg-white rounded-full animate-ping"></span> กำลังถูกใช้งาน`;
+
+            // Start Session Timer
+            startTimer();
+
+            // Stop camera if running
+            if (html5QrScanner) {
+                try { html5QrScanner.stop(); } catch(e){}
+            }
+
+            showToast('เข้าใช้งานสำเร็จ', `ยินดีต้อนรับ ${userName}`, 'success');
+            
+            // Auto switch to active session view
+            setTimeout(() => {
+                switchView('active-session');
+            }, 600);
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            const timerElem = document.getElementById('sessionTimer');
+            
+            timerInterval = setInterval(() => {
+                if (!activeSession) return;
+                const now = new Date();
+                const diffMs = now - activeSession.startTime;
+                
+                const secs = Math.floor((diffMs / 1000) % 60);
+                const mins = Math.floor((diffMs / (1000 * 60)) % 60);
+                const hrs = Math.floor((diffMs / (1000 * 60 * 60)));
+
+                timerElem.innerText = 
+                    `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function renderEquipmentList() {
+            const container = document.getElementById('equipmentListContainer');
+            const room = roomDatabase[currentRoomId];
+            container.innerHTML = '';
+
+            equipmentStatuses = {};
+
+            room.equipments.forEach(eq => {
+                // Default all equipment to GOOD
+                equipmentStatuses[eq.id] = 'GOOD';
+
+                const card = document.createElement('div');
+                card.id = `eq-card-${eq.id}`;
+                card.className = "p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-all";
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-xs">
+                            ${eq.id.split('-')[1]}
+                        </div>
+                        <div>
+                            <p class="font-bold text-xs text-slate-800">${eq.name}</p>
+                            <span class="text-[10px] text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded-md">${eq.category}</span>
+                        </div>
+                    </div>
+
+                    <!-- Fast Toggle Buttons -->
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        <button type="button" onclick="setEquipmentStatus('${eq.id}', 'GOOD')" id="btn-good-${eq.id}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow-sm flex items-center gap-1 transition-all">
+                            <i class="fa-solid fa-circle-check"></i> พร้อมใช้ / ปกติ
+                        </button>
+                        <button type="button" onclick="setEquipmentStatus('${eq.id}', 'DAMAGED')" id="btn-damaged-${eq.id}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-200 text-slate-600 hover:bg-rose-100 hover:text-rose-700 flex items-center gap-1 transition-all">
+                            <i class="fa-solid fa-triangle-exclamation"></i> ชำรุด / มีปัญหา
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function setEquipmentStatus(eqId, status) {
+            equipmentStatuses[eqId] = status;
+            
+            const btnGood = document.getElementById(`btn-good-${eqId}`);
+            const btnDamaged = document.getElementById(`btn-damaged-${eqId}`);
+            const card = document.getElementById(`eq-card-${eqId}`);
+
+            if (status === 'GOOD') {
+                btnGood.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow-sm flex items-center gap-1 transition-all";
+                btnDamaged.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-200 text-slate-600 hover:bg-rose-100 hover:text-rose-700 flex items-center gap-1 transition-all";
+                card.className = "p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-all";
+            } else {
+                btnGood.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-200 text-slate-600 hover:bg-emerald-100 hover:text-emerald-700 flex items-center gap-1 transition-all";
+                btnDamaged.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 text-white shadow-sm flex items-center gap-1 transition-all";
+                card.className = "p-3.5 rounded-xl border border-rose-300 bg-rose-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-all";
+            }
+        }
+
+        function submitCheckOut() {
+            if (!activeSession) return;
+
+            const now = new Date();
+            const timeOutStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            
+            // Check room checklist
+            const clean = document.getElementById('chk-clean').checked;
+            const power = document.getElementById('chk-power').checked;
+            const ac = document.getElementById('chk-ac').checked;
+            const lights = document.getElementById('chk-lights').checked;
+            const noteText = document.getElementById('checkoutNote').value.trim();
+
+            const isRoomOk = clean && power && ac && lights;
+            
+            // Check equipment status
+            let damagedList = [];
+            Object.keys(equipmentStatuses).forEach(eqId => {
+                if (equipmentStatuses[eqId] === 'DAMAGED') {
+                    const room = roomDatabase[activeSession.roomId];
+                    const eqObj = room.equipments.find(e => e.id === eqId);
+                    if (eqObj) damagedList.push(`${eqObj.name} (${eqId})`);
+                }
+            });
+
+            const hasEquipIssue = damagedList.length > 0;
+
+            // Prepare log entry
+            const logEntry = {
+                id: `LOG-${Math.floor(100 + Math.random() * 900)}`,
+                userName: activeSession.userName,
+                userId: activeSession.userId,
+                roomId: activeSession.roomId,
+                checkInTime: activeSession.startTimeStr,
+                checkOutTime: timeOutStr,
+                roomCondition: isRoomOk ? 'เรียบร้อยดี' : 'ไม่เรียบร้อยบางส่วน',
+                equipStatus: hasEquipIssue ? `พบปัญหา (${damagedList.length} ชิ้น)` : 'สมบูรณ์ทุกชิ้น',
+                hasIssue: hasEquipIssue,
+                note: noteText || (hasEquipIssue ? `อุปกรณ์ชำรุด: ${damagedList.join(', ')}` : '-')
+            };
+
+            // Add to top of logs
+            usageLogs.unshift(logEntry);
+
+            // Clear session state
+            clearInterval(timerInterval);
+            activeSession = null;
+            document.getElementById('activeBadge').classList.add('hidden');
+            document.getElementById('checkoutNote').value = '';
+
+            // Reset Room Status Tag
+            const statusTag = document.getElementById('roomStatusTag');
+            statusTag.className = "bg-emerald-500/90 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-inner";
+            statusTag.innerHTML = `<span class="w-2.5 h-2.5 bg-white rounded-full animate-ping"></span> พร้อมใช้งาน (ว่าง)`;
+
+            // Update UI & Stats
+            renderLogsTable();
+            updateStats();
+            
+            showToast('บันทึกคืนห้องสำเร็จ', 'ขอบคุณสำหรับการคืนห้องและบันทึกข้อมูลครับ', 'success');
+            
+            // Redirect to Logs
+            setTimeout(() => {
+                switchView('logs');
+            }, 600);
+        }
+
+        function renderLogsTable() {
+            const tbody = document.getElementById('logsTableBody');
+            tbody.innerHTML = '';
+
+            usageLogs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-all";
+                
+                tr.innerHTML = `
+                    <td class="p-3.5">
+                        <p class="font-bold text-slate-800">${log.userName}</p>
+                        <p class="text-[10px] text-slate-400">ID: ${log.userId}</p>
+                    </td>
+                    <td class="p-3.5 font-medium text-slate-700">
+                        <span class="bg-slate-100 px-2 py-0.5 rounded text-[11px] font-semibold">${log.roomId}</span>
+                    </td>
+                    <td class="p-3.5 text-slate-600">
+                        ${log.checkInTime} - ${log.checkOutTime}
+                    </td>
+                    <td class="p-3.5">
+                        <span class="${log.roomCondition === 'เรียบร้อยดี' ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'} px-2 py-0.5 rounded-full text-[11px] font-medium">
+                            ${log.roomCondition}
+                        </span>
+                    </td>
+                    <td class="p-3.5">
+                        <span class="${log.hasIssue ? 'text-rose-600 bg-rose-50 font-bold' : 'text-emerald-600 bg-emerald-50'} px-2 py-0.5 rounded-full text-[11px]">
+                            ${log.equipStatus}
+                        </span>
+                    </td>
+                    <td class="p-3.5 text-slate-500 max-w-xs truncate" title="${log.note}">
+                        ${log.note}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('statTotalUse').innerText = `${usageLogs.length} ครั้ง`;
+            
+            const issueLogs = usageLogs.filter(l => l.hasIssue);
+            document.getElementById('statDamagedCount').innerText = `${issueLogs.length} รายการ`;
+
+            const normalPercent = Math.round(((usageLogs.length - issueLogs.length) / (usageLogs.length || 1)) * 100);
+            document.getElementById('statNormalEquip').innerText = `${normalPercent}%`;
+        }
+
+        function toggleCameraScanner() {
+            const btn = document.getElementById('btnToggleCamera');
+            
+            if (html5QrScanner && html5QrScanner.isScanning) {
+                html5QrScanner.stop().then(() => {
+                    btn.innerHTML = `<i class="fa-solid fa-video mr-1"></i> เปิดกล้องสแกน`;
+                    document.getElementById('qr-reader').innerHTML = `
+                        <div id="scannerPlaceholder" class="p-4 text-slate-400 text-center">
+                            <i class="fa-solid fa-qrcode text-5xl mb-2 text-slate-600"></i>
+                            <p class="text-xs">กดปุ่มด้านล่างเพื่อเปิดกล้องสแกน</p>
+                        </div>
+                    `;
+                });
+                return;
+            }
+
+            btn.innerHTML = `<i class="fa-solid fa-stop mr-1"></i> ปิดกล้อง`;
+            
+            html5QrScanner = new Html5Qrcode("qr-reader");
+            html5QrScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 180, height: 180 } },
+                (decodedText) => {
+                    simulateScan('QR-USER', decodedText);
+                },
+                (errorMessage) => {
+                    // Ignore scan errors while searching
+                }
+            ).catch(err => {
+                showToast('กล้องขัดข้อง', 'ไม่สามารถเข้าถึงกล้องได้ โปรดใช้ปุ่มจำลองการสแกนด้านล่าง', 'error');
+                btn.innerHTML = `<i class="fa-solid fa-video mr-1"></i> เปิดกล้องสแกน`;
+            });
+        }
+
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastTitle.innerText = title;
+            toastMessage.innerText = message;
+
+            if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-exclamation text-rose-400 text-lg";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        /* CSV Export Helper */
+        function exportLogsCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,ID,User,Room,CheckIn,CheckOut,RoomCondition,EquipStatus,Note\n";
+            usageLogs.forEach(l => {
+                csvContent += `${l.id},"${l.userName}",${l.roomId},${l.checkInTime},${l.checkOutTime},"${l.roomCondition}","${l.equipStatus}","${l.note}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `lab_access_logs_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
