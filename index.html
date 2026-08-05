@@ -1,304 +1,307 @@
 <!DOCTYPE html>
-<html lang="th" class="h-full bg-slate-50">
+<html lang="th" class="h-full bg-slate-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบลงทะเบียนเข้าใช้งานห้องปฏิบัติการ (Lab Access & Inspection System)</title>
+    <title>Smart Lab Access - ระบบบันทึกเข้าใช้งานและตรวจเช็กห้องปฏิบัติการ</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Prompt & Inter) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Prompt', 'Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Google Fonts (Prompt) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+    </style>
 </head>
-<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-100">
 
-    <!-- Top Navigation Header -->
-    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo & Title -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center shadow-lg shadow-brand-500/30">
-                        <i class="fa-solid fa-microscope text-white text-lg"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">RMSC-4 LAB ACCESS</h1>
-                        <p class="text-[11px] text-slate-400 font-light">ระบบบันทึกเข้าใช้งานและตรวจเช็กความพร้อมห้องแล็บ</p>
-                    </div>
+    <!-- TOP NAV (NAVBAR แบบในภาพ) -->
+    <header class="bg-[#0f172a] text-white shadow-md sticky top-0 z-40 px-4 lg:px-8 py-2.5 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- Logo & Brand -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center text-white text-xl shadow-lg shadow-sky-500/30">
+                    <i class="fa-solid fa-flask-vial"></i>
                 </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white leading-tight">Smart Lab Access</h1>
+                    <p class="text-[11px] text-slate-400">ระบบบันทึกเข้าใช้งานและตรวจเช็กห้องปฏิบัติการ</p>
+                </div>
+            </div>
 
-                <!-- Navigation Tabs -->
-                <nav class="flex space-x-1 sm:space-x-2">
-                    <button onclick="switchView('terminal')" id="tab-terminal" class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 bg-brand-600 text-white shadow-sm">
-                        <i class="fa-solid fa-door-open mr-1.5"></i>เข้า/ออกแล็บ
-                    </button>
-                    <button onclick="switchView('logs')" id="tab-logs" class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">
-                        <i class="fa-solid fa-clock-rotate-left mr-1.5"></i>ประวัติใช้งาน
-                    </button>
-                    <button onclick="switchView('admin')" id="tab-admin" class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200">
-                        <i class="fa-solid fa-sliders mr-1.5"></i>จัดการห้องแล็บ
-                    </button>
-                </nav>
+            <!-- Quick Room Switcher & Admin Button -->
+            <div class="flex items-center space-x-2">
+                <div class="relative">
+                    <select id="topRoomSelect" onchange="changeRoom(this.value)" class="bg-slate-800 text-slate-100 text-xs sm:text-sm font-medium px-3 py-2 pr-8 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer">
+                        <option value="Extraction Room (ห้องสกัดตัวอย่าง)">🧪 Extraction Room (ห้องสกัดตัวอย่าง)</option>
+                        <option value="Mastermix Preparation Room (ห้องเตรียมน้ำยา)">🧫 Mastermix Preparation Room (ห้องเตรียมน้ำยา)</option>
+                        <option value="Additive Room (ห้องเติม Template)">🧬 Additive Room (ห้องเติม Template)</option>
+                        <option value="Amplification Room (ห้องเพิ่มสารพันธุกรรม)">🔬 Amplification Room (ห้องเพิ่มสารพันธุกรรม)</option>
+                        <option value="Biosafety Level 3 (ห้อง BSL 3)">☣️ Biosafety Level 3 (ห้อง BSL 3)</option>
+                    </select>
+                </div>
+                <button onclick="switchTab('admin')" class="bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm font-medium px-3 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>จัดการระบบ</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Cloud Connection Status Alert -->
-    <div id="connectionStatus" class="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-800 text-center font-medium flex items-center justify-center space-x-2">
-        <i class="fa-solid fa-spinner fa-spin text-amber-600"></i>
-        <span>กำลังเชื่อมต่อฐานข้อมูล Cloud เรียลไทม์ (Acclab Firebase)...</span>
+    <!-- Cloud Status Bar -->
+    <div id="connectionStatus" class="bg-amber-100 text-amber-800 text-xs py-1.5 text-center font-medium border-b border-amber-200">
+        <i class="fa-solid fa-spinner fa-spin mr-1.5"></i>กำลังเชื่อมต่อฐานข้อมูล Cloud (Acclab Firebase)...
     </div>
 
-    <!-- Main Container -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
 
-        <!-- ================= VIEW 1: TERMINAL / CHECK-IN ================= -->
-        <div id="view-terminal" class="space-y-6">
-            
-            <!-- Room Selection Bar -->
-            <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80">
-                <div class="flex items-center justify-between mb-3">
-                    <label class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center">
-                        <i class="fa-solid fa-compass mr-1.5 text-brand-600"></i>เลือกระบุห้องปฏิบัติการที่ต้องการเข้าใช้
-                    </label>
-                    <span id="currentRoomTag" class="px-2.5 py-1 bg-brand-50 text-brand-700 text-xs font-semibold rounded-lg border border-brand-200">
-                        Extraction Room
+        <!-- 1. CURRENT ROOM STATUS BANNER (ตรงตามภาพ) -->
+        <div class="bg-[#0f172a] rounded-2xl p-5 text-white shadow-xl relative overflow-hidden border border-slate-800">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                <div>
+                    <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-bold bg-sky-950 text-sky-400 border border-sky-800/60 mb-1.5">
+                        ห้องปฏิบัติการปัจจุบัน
                     </span>
+                    <h2 id="bannerRoomName" class="text-xl sm:text-2xl font-bold tracking-tight text-white">Extraction Room (ห้องสกัดตัวอย่าง)</h2>
+                    <p class="text-xs text-slate-400 mt-1 flex items-center">
+                        <i class="fa-solid fa-location-dot mr-1.5 text-sky-400"></i>อาคารปฏิบัติการตรวจวิเคราะห์ ชั้น 1
+                    </p>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5" id="roomButtonsList">
-                    <!-- Dynamic Rooms -->
-                </div>
-            </div>
-
-            <!-- Active Sessions Banner (if any) -->
-            <div id="activeSessionsContainer" class="hidden space-y-3">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center">
-                    <i class="fa-solid fa-spinner fa-spin mr-1.5"></i>ผู้ปฏิบัติงานที่กำลังใช้งานห้องแล็บในขณะนี้ (Active Sessions)
-                </h3>
-                <div id="activeSessionsList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- Dynamic Active Cards -->
-                </div>
-            </div>
-
-            <!-- User 1-Tap Check-In Grid -->
-            <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200/80">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                    <div>
-                        <h2 class="text-base font-bold text-slate-800 flex items-center">
-                            <i class="fa-solid fa-id-card text-brand-600 mr-2"></i>กดที่ชื่อของคุณเพื่อบันทึกเข้าใช้งานทันที (1-Tap Check-In)
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-0.5">ระบบจะบันทึกเวลาเริ่มต้นใช้งานเข้าสู่ฐานข้อมูล Cloud ถาวรอัตโนมัติ</p>
-                    </div>
-                    <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium self-start sm:self-auto">
-                        ผู้มีสิทธิ์ใช้งานในระบบ
+                <div id="bannerStatusBadge">
+                    <span class="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold text-sm rounded-xl flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>พร้อมใช้งาน (ว่าง)</span>
                     </span>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5" id="userQuickCardsGrid">
-                    <!-- Dynamic User Tap Cards -->
                 </div>
             </div>
         </div>
 
-        <!-- ================= VIEW 2: LOGS & HISTORY ================= -->
-        <div id="view-logs" class="hidden space-y-4">
-            <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200/80">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+        <!-- 2. MAIN NAVIGATION TABS (4 แท็บตรงตามภาพ) -->
+        <div class="bg-white rounded-2xl p-1.5 shadow-sm border border-slate-200/80 flex flex-wrap sm:flex-nowrap gap-1">
+            <button onclick="switchTab('checkin')" id="tab-btn-checkin" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 bg-sky-50 text-sky-700 shadow-sm border border-sky-200">
+                <i class="fa-solid fa-grip text-sky-600"></i>
+                <span>เลือกชื่อสแกนเข้าใช้งาน</span>
+            </button>
+            <button onclick="switchTab('active')" id="tab-btn-active" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-50">
+                <i class="fa-solid fa-clock-rotate-left text-slate-400"></i>
+                <span>สถานะใช้งาน / คืนห้อง</span>
+            </button>
+            <button onclick="switchTab('logs')" id="tab-btn-logs" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-50">
+                <i class="fa-solid fa-clipboard-list text-slate-400"></i>
+                <span>ประวัติการเข้าใช้</span>
+            </button>
+            <button onclick="switchTab('admin')" id="tab-btn-admin" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-50">
+                <i class="fa-solid fa-user-gear text-slate-400"></i>
+                <span>ระบบจัดการห้องปฏิบัติการ</span>
+            </button>
+        </div>
+
+        <!-- TAB CONTENT 1: TAP TO CHECK-IN -->
+        <div id="tab-checkin" class="space-y-4">
+            <!-- Selected Room Notification Box -->
+            <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 flex items-center justify-between text-sky-900 text-xs sm:text-sm">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-sky-500 text-white flex items-center justify-center text-lg shadow-sm">
+                        <i class="fa-solid fa-door-open"></i>
+                    </div>
                     <div>
-                        <h2 class="text-base font-bold text-slate-800"><i class="fa-solid fa-list-check text-brand-600 mr-2"></i>ประวัติการเข้าใช้งานและบันทึกตรวจเช็กความพร้อม</h2>
-                        <p class="text-xs text-slate-500">ข้อมูลทั้งหมดบันทึกเรียลไทม์บน Cloud Database</p>
+                        <p class="text-[11px] text-sky-600 font-semibold">ห้องปฏิบัติการที่เลือกสแกนเข้า:</p>
+                        <strong id="infoRoomName" class="text-sm sm:text-base font-bold text-sky-950">Extraction Room (ห้องสกัดตัวอย่าง)</strong>
+                    </div>
+                </div>
+                <span class="text-[11px] bg-white px-3 py-1 rounded-full border border-sky-200 text-sky-700 font-medium">
+                    <i class="fa-solid fa-circle-info mr-1"></i>เปลี่ยนห้องได้จากเมนูด้านบนสุด
+                </span>
+            </div>
+
+            <!-- User Quick Access Grid -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base flex items-center">
+                            <i class="fa-solid fa-user-check text-sky-600 mr-2"></i>กดเลือกชื่อผู้เข้าใช้งาน (แตะเพื่อเข้าห้องทันที)
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">เลือกชื่อบุคลากรผู้ปฏิบัติงาน เพื่อเริ่มบันทึกเวลาการเข้าใช้ห้อง</p>
+                    </div>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold flex items-center">
+                        <i class="fa-solid fa-bolt text-emerald-500 mr-1.5"></i>1-Tap Entry
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5" id="userCardsGrid">
+                    <!-- Dynamic User Cards (ตรงตามภาพ) -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT 2: ACTIVE SESSIONS & CHECK-OUT -->
+        <div id="tab-active" class="hidden space-y-4">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-users-viewfinder text-amber-500 mr-2"></i>ผู้กำลังใช้งานห้องปฏิบัติการขณะนี้</h3>
+                        <p class="text-xs text-slate-500">บันทึกเวลาเข้าสะสม และกดปุ่มเช็กเอาท์เพื่อบันทึกคืนห้อง</p>
+                    </div>
+                </div>
+                <div id="activeSessionsList" class="space-y-3">
+                    <p class="text-center py-8 text-slate-400 text-sm italic">ไม่มีผู้ใช้งานอยู่ในห้องปฏิบัติการขณะนี้</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT 3: HISTORY LOGS (ประวัติการใช้งานแบบครบถ้วน) -->
+        <div id="tab-logs" class="hidden space-y-4">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-rectangle-list text-sky-600 mr-2"></i>ประวัติการเข้าใช้และบันทึกความพร้อมห้อง</h3>
+                        <p class="text-xs text-slate-500">แสดงข้อมูลเวลาเข้า-ออก และสถานะการตรวจเช็กครุภัณฑ์ถาวรบน Cloud</p>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-200">
+                        <thead class="bg-slate-50 text-slate-600 uppercase font-bold text-[11px] tracking-wider border-b border-slate-200">
                             <tr>
                                 <th class="py-3 px-4">ผู้เข้าใช้งาน</th>
                                 <th class="py-3 px-4">ห้องปฏิบัติการ</th>
-                                <th class="py-3 px-4">วันที่บันทึก</th>
-                                <th class="py-3 px-4">เวลาคืนห้อง</th>
-                                <th class="py-3 px-4 text-center">ความเรียบร้อยอุปกรณ์</th>
+                                <th class="py-3 px-4">วันที่</th>
+                                <th class="py-3 px-4">เวลาเข้า</th>
+                                <th class="py-3 px-4">เวลาออก</th>
+                                <th class="py-3 px-4">ความเรียบร้อยห้อง</th>
+                                <th class="py-3 px-4 text-center">สถานะครุภัณฑ์</th>
                             </tr>
                         </thead>
                         <tbody id="logsTableBody" class="divide-y divide-slate-100">
-                            <!-- Dynamic Logs -->
+                            <!-- Dynamic History Logs -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- ================= VIEW 3: ADMIN LAB MANAGEMENT ================= -->
-        <div id="view-admin" class="hidden space-y-6">
-            <!-- Password Auth Screen -->
+        <!-- TAB CONTENT 4: ADMIN MANAGEMENT -->
+        <div id="tab-admin" class="hidden space-y-5">
+            <!-- Auth Login Card -->
             <div id="adminAuthBox" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200/80 max-w-md mx-auto text-center space-y-4">
-                <div class="w-16 h-16 bg-slate-100 text-brand-600 rounded-full flex items-center justify-center mx-auto text-2xl">
-                    <i class="fa-solid fa-shield-halved"></i>
+                <div class="w-14 h-14 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-lock"></i>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-slate-800">ระบบจัดการห้องปฏิบัติการ</h3>
-                    <p class="text-xs text-slate-500 mt-1">กรุณากรอกรหัสผ่านผู้ดูแลระบบเพื่อแก้ไขรายชื่อและครุภัณฑ์</p>
+                    <h3 class="text-base font-bold text-slate-800">ยืนยันสิทธิ์ผู้ดูแลระบบ (Admin)</h3>
+                    <p class="text-xs text-slate-500 mt-1">กรอกรหัสผ่านเพื่อเข้าสู่หน้าจัดการบุคลากรและครุภัณฑ์</p>
                 </div>
-                <input type="password" id="adminPasswordInput" placeholder="รหัสผ่าน Admin" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-center text-sm focus:ring-2 focus:ring-brand-500 outline-none">
-                <button onclick="verifyAdminPassword()" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-xl text-sm transition-all shadow-md shadow-brand-500/20">
+                <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่าน (Rmsc4_admin)" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-center text-sm focus:ring-2 focus:ring-sky-500 outline-none">
+                <button onclick="verifyAdminPassword()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-xl text-sm transition shadow-md shadow-sky-500/20">
                     เข้าสู่ระบบจัดการ
                 </button>
             </div>
 
-            <!-- Admin Content Screen (Protected) -->
-            <div id="adminMainContent" class="hidden space-y-6">
-                <div class="flex justify-between items-center bg-brand-900 text-white p-4 rounded-2xl shadow-md">
-                    <div class="flex items-center space-x-2">
-                        <i class="fa-solid fa-user-gear text-teal-400"></i>
-                        <span class="text-sm font-semibold">โหมดผู้ดูแลระบบ (Admin Authenticated)</span>
-                    </div>
-                    <button onclick="logoutAdmin()" class="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-slate-200 transition">
-                        ออกจากระบบ Admin
-                    </button>
+            <!-- Admin Main Screen (Protected) -->
+            <div id="adminMainContent" class="hidden space-y-5">
+                <div class="flex justify-between items-center bg-[#0f172a] text-white p-4 rounded-2xl">
+                    <span class="text-xs sm:text-sm font-semibold text-sky-400"><i class="fa-solid fa-shield-halved mr-2"></i>โหมดผู้ดูแลระบบ (Admin Access)</span>
+                    <button onclick="logoutAdmin()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300">ออกจากระบบ</button>
                 </div>
 
-                <!-- Section: Manage Personnel -->
-                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200/80 space-y-4">
-                    <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                        <i class="fa-solid fa-users text-brand-600 mr-2"></i>จัดการรายชื่อบุคลากรที่มีสิทธิ์เข้าใช้งาน
-                    </h3>
+                <!-- Add User -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                    <h4 class="font-bold text-slate-800 text-sm">เพิ่มผู้มีสิทธิ์ใช้งานห้องปฏิบัติการ</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <input type="text" id="newUserId" placeholder="รหัสผู้ใช้ (เช่น LABPT-RMSC4-05)" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm">
-                        <input type="text" id="newUserName" placeholder="ชื่อ - นามสกุล" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm">
-                        <button onclick="addNewUser()" class="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-xl text-xs sm:text-sm transition shadow-sm">
+                        <input type="text" id="newUserId" placeholder="รหัสผู้ใช้งาน (เช่น LABPT-RMSC4-05)" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm">
+                        <input type="text" id="newUserName" placeholder="ชื่อ-นามสกุล" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm">
+                        <button onclick="addNewUser()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-xl text-xs sm:text-sm transition">
                             + เพิ่มผู้ใช้งาน
                         </button>
                     </div>
                 </div>
 
-                <!-- Section: Manage Room Assets -->
-                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200/80 space-y-4">
-                    <h3 class="text-sm font-bold text-slate-800 flex items-center">
-                        <i class="fa-solid fa-toolbox text-brand-600 mr-2"></i>จัดการครุภัณฑ์และอุปกรณ์ประจำห้อง
-                    </h3>
+                <!-- Add Equipment -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                    <h4 class="font-bold text-slate-800 text-sm">เพิ่มครุภัณฑ์และอุปกรณ์ประจำห้อง</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                         <select id="equipRoomSelect" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-white">
-                            <option value="Extraction Room">Extraction Room</option>
-                            <option value="Mastermix Preparation Room">Mastermix Preparation Room</option>
-                            <option value="Additive Room">Additive Room</option>
-                            <option value="Amplification Room">Amplification Room</option>
-                            <option value="BSL 3">BSL 3</option>
+                            <option value="Extraction Room (ห้องสกัดตัวอย่าง)">Extraction Room</option>
+                            <option value="Mastermix Preparation Room (ห้องเตรียมน้ำยา)">Mastermix Preparation Room</option>
+                            <option value="Additive Room (ห้องเติม Template)">Additive Room</option>
+                            <option value="Amplification Room (ห้องเพิ่มสารพันธุกรรม)">Amplification Room</option>
+                            <option value="Biosafety Level 3 (ห้อง BSL 3)">BSL 3</option>
                         </select>
                         <input type="text" id="newEquipAssetId" placeholder="เลขครุภัณฑ์" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm">
                         <input type="text" id="newEquipName" placeholder="ชื่ออุปกรณ์ / เครื่องมือ" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm">
-                        <button onclick="addNewEquipment()" class="bg-brand-600 hover:bg-brand-700 text-white font-medium py-2 px-4 rounded-xl text-xs sm:text-sm transition shadow-sm">
+                        <button onclick="addNewEquipment()" class="bg-sky-600 hover:bg-sky-500 text-white font-medium py-2 px-4 rounded-xl text-xs sm:text-sm transition">
                             + เพิ่มครุภัณฑ์
                         </button>
                     </div>
-
-                    <div class="pt-2">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">รายการครุภัณฑ์ทั้งหมดในระบบ</h4>
-                        <div id="adminEquipmentList" class="space-y-2">
-                            <!-- Dynamic Asset List -->
-                        </div>
+                    <div class="pt-3">
+                        <h5 class="text-xs font-bold text-slate-400 uppercase mb-2">รายการครุภัณฑ์ปัจจุบัน</h5>
+                        <div id="adminEquipmentList" class="space-y-2"></div>
                     </div>
                 </div>
             </div>
         </div>
-
     </main>
 
-    <!-- ================= MODAL: CHECK-OUT & INSPECTION ================= -->
+    <!-- CHECKOUT MODAL (บันทึกการออกจากห้อง & เช็กความพร้อม) -->
     <div id="checkoutModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
-            <!-- Modal Header -->
-            <div class="p-5 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-clipboard-check text-teal-400 text-lg"></i>
-                    <h3 class="font-bold text-base">บันทึกคืนห้อง & ตรวจสอบอุปกรณ์</h3>
-                </div>
-                <button onclick="closeCheckoutModal()" class="text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+            <div class="p-5 bg-[#0f172a] text-white flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center">
+                    <i class="fa-solid fa-clipboard-check text-emerald-400 mr-2"></i>บันทึกเวลาออกจากห้อง & เช็กความพร้อม
+                </h3>
+                <button onclick="closeCheckoutModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-
-            <!-- Modal Body -->
-            <div class="p-6 overflow-y-auto space-y-5 flex-1">
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/60 space-y-1 text-xs sm:text-sm">
+            <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs sm:text-sm">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-1">
                     <p><strong class="text-slate-500">ผู้ใช้งาน:</strong> <span id="modalUserName" class="font-bold text-slate-800">-</span></p>
-                    <p><strong class="text-slate-500">ห้องปฏิบัติการ:</strong> <span id="modalRoomName" class="font-bold text-brand-600">-</span></p>
+                    <p><strong class="text-slate-500">ห้องปฏิบัติการ:</strong> <span id="modalRoomName" class="font-bold text-sky-600">-</span></p>
+                    <p><strong class="text-slate-500">เวลาที่บันทึกเข้า:</strong> <span id="modalCheckInTime" class="font-medium text-slate-700">-</span></p>
                 </div>
 
-                <!-- 1. Room Checklist -->
                 <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">1. การจัดเก็บความเรียบร้อยของห้อง</h4>
-                    <div class="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-                        <label class="flex items-center space-x-2 border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-slate-50">
-                            <input type="checkbox" id="chkAir" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
-                            <span class="text-slate-700">ปิดเครื่องปรับอากาศ</span>
+                    <h4 class="font-bold text-slate-700 mb-2">1. ความเรียบร้อยของห้องปฏิบัติการ</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center space-x-2 border p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                            <input type="checkbox" id="chkAir" checked class="rounded text-sky-600 w-4 h-4">
+                            <span>ปิดเครื่องปรับอากาศ</span>
                         </label>
-                        <label class="flex items-center space-x-2 border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-slate-50">
-                            <input type="checkbox" id="chkLight" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
-                            <span class="text-slate-700">ปิดไฟแสงสว่าง</span>
+                        <label class="flex items-center space-x-2 border p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                            <input type="checkbox" id="chkLight" checked class="rounded text-sky-600 w-4 h-4">
+                            <span>ปิดไฟแสงสว่าง</span>
                         </label>
-                        <label class="flex items-center space-x-2 border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-slate-50">
-                            <input type="checkbox" id="chkPlug" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
-                            <span class="text-slate-700">ถอดปลั๊กที่ไม่จำเป็น</span>
+                        <label class="flex items-center space-x-2 border p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                            <input type="checkbox" id="chkPlug" checked class="rounded text-sky-600 w-4 h-4">
+                            <span>ถอดปลั๊กที่ไม่จำเป็น</span>
                         </label>
-                        <label class="flex items-center space-x-2 border border-slate-200 p-3 rounded-xl cursor-pointer hover:bg-slate-50">
-                            <input type="checkbox" id="chkClean" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
-                            <span class="text-slate-700">ทำความสะอาด/เก็บขยะ</span>
+                        <label class="flex items-center space-x-2 border p-3 rounded-xl cursor-pointer hover:bg-slate-50">
+                            <input type="checkbox" id="chkClean" checked class="rounded text-sky-600 w-4 h-4">
+                            <span>ทำความสะอาด/เก็บขยะ</span>
                         </label>
                     </div>
                 </div>
 
-                <!-- 2. Equipment Fast Toggle -->
                 <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">2. ประเมินความพร้อมของครุภัณฑ์หลังใช้งาน</h4>
-                    <div id="modalEquipmentList" class="space-y-2.5">
-                        <!-- Dynamic Equipment Status Check -->
-                    </div>
+                    <h4 class="font-bold text-slate-700 mb-2">2. ประเมินความพร้อมครุภัณฑ์ประจำห้อง</h4>
+                    <div id="modalEquipmentList" class="space-y-2"></div>
                 </div>
             </div>
-
-            <!-- Modal Footer -->
-            <div class="p-4 bg-slate-50 border-t border-slate-200/80 flex justify-end space-x-2">
-                <button onclick="closeCheckoutModal()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-xl text-xs sm:text-sm font-medium hover:bg-slate-100 transition">
-                    ยกเลิก
-                </button>
-                <button onclick="confirmCheckout()" class="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs sm:text-sm font-medium transition shadow-md shadow-teal-600/20">
-                    บันทึกส่งคืนห้องปฏิบัติการ
+            <div class="p-4 bg-slate-50 border-t flex justify-end space-x-2">
+                <button onclick="closeCheckoutModal()" class="px-4 py-2 border rounded-xl font-medium hover:bg-slate-100">ยกเลิก</button>
+                <button onclick="confirmCheckout()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-medium shadow-md">
+                    บันทึกส่งคืนห้อง (Check-Out)
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase Cloud SDK -->
+    <!-- Firebase Realtime Cloud SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your Firebase Configuration (Acclab Project)
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCISN7dBIIGqwfjYQFm_i1n1cC5fn-3L94",
             authDomain: "acclab-ecf70.firebaseapp.com",
@@ -309,62 +312,49 @@
             measurementId: "G-8PDG1WKNLY"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Core App State
-        let currentRoom = "Extraction Room";
+        let currentRoom = "Extraction Room (ห้องสกัดตัวอย่าง)";
         let defaultUsers = [
-            { id: "LABPT-RMSC4-01", name: "ดร.ภัทรพล วงษ์ภูธร" },
-            { id: "LABPT-RMSC4-02", name: "นายปัญญ์ปิยะ รอบคอบ" },
-            { id: "LABPT-RMSC4-03", name: "นางสาวปิยะรัตน์ ชดช้อย" },
-            { id: "LABPT-RMSC4-04", name: "นายกฤษณ์ธนะวัจน์ ปั้นธนาย์แก้ว" },
-            { id: "LABPT-RMSC4-00", name: "Other (ช่างเทคนิค/ผู้มาติดต่อ)" }
+            { id: "LABPT-RMSC4-01", name: "ดร.ภัทรพล วงษ์ภูธร", isOther: false },
+            { id: "LABPT-RMSC4-02", name: "นายปัญญ์ปิยะ รอบคอบ", isOther: false },
+            { id: "LABPT-RMSC4-03", name: "นางสาวปิยะรัตน์ ชดช้อย", isOther: false },
+            { id: "LABPT-RMSC4-04", name: "นายกฤษณ์ธนะวัจน์ ปั้นธนาย์แก้ว", isOther: false },
+            { id: "LABPT-RMSC4-00", name: "ช่างเทคนิค / ผู้มาติดต่อ (Other)", isOther: true }
         ];
-        let rooms = [
-            "Extraction Room", 
-            "Mastermix Preparation Room", 
-            "Additive Room", 
-            "Amplification Room", 
-            "BSL 3"
-        ];
-        let activeCheckoutSessionId = null;
+
+        let activeCheckoutSession = null;
         let equipmentStates = {};
+        let activeSessionsData = [];
 
-        // Application Initialization & Realtime Listeners
         window.addEventListener('DOMContentLoaded', () => {
-            renderRoomButtons();
-
-            // Realtime Listener: Active Sessions
+            // Realtime Active Sessions
             onSnapshot(collection(db, "active_sessions"), (snapshot) => {
-                document.getElementById('connectionStatus').className = "bg-teal-50 border-b border-teal-200 px-4 py-2 text-xs text-teal-800 text-center font-medium flex items-center justify-center space-x-2";
-                document.getElementById('connectionStatus').innerHTML = '<i class="fa-solid fa-cloud-check text-teal-600"></i><span>เชื่อมต่อฐานข้อมูล Cloud (Acclab Firebase) เรียลไทม์สมบูรณ์</span>';
+                document.getElementById('connectionStatus').className = "bg-emerald-100 text-emerald-800 text-xs py-1.5 text-center font-medium border-b border-emerald-200";
+                document.getElementById('connectionStatus').innerHTML = '<i class="fa-solid fa-cloud-check mr-1.5"></i>เชื่อมต่อฐานข้อมูล Cloud (Acclab Firebase) เรียลไทม์สมบูรณ์';
 
-                let activeSessions = [];
-                snapshot.forEach(doc => activeSessions.push({ id: doc.id, ...doc.data() }));
-                renderActiveSessions(activeSessions);
-            }, (error) => {
-                document.getElementById('connectionStatus').className = "bg-red-50 border-b border-red-200 px-4 py-2 text-xs text-red-800 text-center font-medium flex items-center justify-center space-x-2";
-                document.getElementById('connectionStatus').innerHTML = '<i class="fa-solid fa-circle-exclamation text-red-600"></i><span>กรุณาคลิกเปิด Firestore ใน test mode บน Firebase Console</span>';
+                activeSessionsData = [];
+                snapshot.forEach(doc => activeSessionsData.push({ id: doc.id, ...doc.data() }));
+                updateRoomStatusBanner();
+                renderActiveSessions();
             });
 
-            // Realtime Listener: Users
+            // Realtime Users
             onSnapshot(collection(db, "users"), (snapshot) => {
                 let dbUsers = [];
                 snapshot.forEach(doc => dbUsers.push({ docId: doc.id, ...doc.data() }));
-                let allUsers = [...defaultUsers, ...dbUsers];
-                renderUsers(allUsers);
+                renderUsers([...defaultUsers, ...dbUsers]);
             });
 
-            // Realtime Listener: Equipment
+            // Realtime Equipment
             onSnapshot(collection(db, "equipment"), (snapshot) => {
                 window.allEquipment = [];
                 snapshot.forEach(doc => window.allEquipment.push({ docId: doc.id, ...doc.data() }));
                 renderAdminEquipment();
             });
 
-            // Realtime Listener: History Logs
+            // Realtime Logs
             onSnapshot(collection(db, "logs"), (snapshot) => {
                 let logs = [];
                 snapshot.forEach(doc => logs.push(doc.data()));
@@ -372,119 +362,144 @@
             });
         });
 
-        // UI View Switcher
-        window.switchView = (viewName) => {
-            ['terminal', 'logs', 'admin'].forEach(v => {
-                document.getElementById(`view-${v}`).classList.add('hidden');
-                document.getElementById(`tab-${v}`).className = "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200";
-            });
-            document.getElementById(`view-${viewName}`).classList.remove('hidden');
-            document.getElementById(`tab-${viewName}`).className = "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 bg-brand-600 text-white shadow-sm";
-        };
-
-        // Render Room Buttons
-        window.renderRoomButtons = () => {
-            const container = document.getElementById('roomButtonsList');
-            container.innerHTML = rooms.map(room => `
-                <button onclick="selectRoom('${room}')" class="p-3 rounded-xl border text-xs font-semibold text-center transition-all ${room === currentRoom ? 'bg-brand-600 text-white border-brand-600 shadow-md shadow-brand-500/20' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'}">
-                    ${room}
-                </button>
-            `).join('');
-            document.getElementById('currentRoomTag').innerText = currentRoom;
-        };
-
-        window.selectRoom = (roomName) => {
+        // Switch Room
+        window.changeRoom = (roomName) => {
             currentRoom = roomName;
-            renderRoomButtons();
+            document.getElementById('bannerRoomName').innerText = roomName;
+            document.getElementById('infoRoomName').innerText = roomName;
+            updateRoomStatusBanner();
         };
 
-        // Render 1-Tap User Check-In Cards
+        function updateRoomStatusBanner() {
+            const inUse = activeSessionsData.find(s => s.room === currentRoom);
+            const container = document.getElementById('bannerStatusBadge');
+            if (inUse) {
+                container.innerHTML = `
+                    <span class="px-4 py-2 bg-amber-500/20 text-amber-400 border border-amber-500/40 font-bold text-sm rounded-xl flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                        <span>มีผู้ใช้งานอยู่ (${inUse.userName})</span>
+                    </span>
+                `;
+            } else {
+                container.innerHTML = `
+                    <span class="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold text-sm rounded-xl flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>พร้อมใช้งาน (ว่าง)</span>
+                    </span>
+                `;
+            }
+        }
+
+        // Render Cards (ตรงตามภาพ)
         window.renderUsers = (usersList) => {
-            const container = document.getElementById('userQuickCardsGrid');
-            container.innerHTML = usersList.map(u => `
-                <button onclick="checkIn('${u.id}', '${u.name}')" class="group p-4 bg-slate-50 hover:bg-brand-50/70 border border-slate-200 hover:border-brand-300 rounded-2xl transition-all duration-200 text-left flex items-center justify-between shadow-sm">
-                    <div class="space-y-0.5">
-                        <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase group-hover:text-brand-600">${u.id}</span>
-                        <h4 class="font-bold text-slate-800 text-sm group-hover:text-brand-900">${u.name}</h4>
-                    </div>
-                    <div class="w-8 h-8 rounded-xl bg-white group-hover:bg-brand-600 text-slate-300 group-hover:text-white flex items-center justify-center transition-all shadow-sm">
-                        <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
-                    </div>
-                </button>
-            `).join('');
+            const container = document.getElementById('userCardsGrid');
+            container.innerHTML = usersList.map(u => {
+                if (u.isOther || u.id === 'LABPT-RMSC4-00') {
+                    return `
+                        <button onclick="checkIn('${u.id}', '${u.name}')" class="p-4 rounded-2xl border-2 border-amber-300 bg-amber-50/60 hover:bg-amber-100/80 transition text-left flex items-center justify-between group shadow-sm">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-lg shadow-sm">
+                                    <i class="fa-solid fa-wrench"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-amber-950 text-sm">${u.name}</h4>
+                                    <p class="text-[11px] text-amber-700 font-medium">✨ แตะเพื่อเข้าห้องนี้</p>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold px-2 py-0.5 bg-amber-200/80 text-amber-900 rounded-md border border-amber-300">${u.id}</span>
+                        </button>
+                    `;
+                }
+                return `
+                    <button onclick="checkIn('${u.id}', '${u.name}')" class="p-4 rounded-2xl border border-sky-100 bg-sky-50/40 hover:bg-sky-100/60 transition text-left flex items-center justify-between group shadow-sm">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center text-lg shadow-sm">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm group-hover:text-sky-950">${u.name}</h4>
+                                <p class="text-[11px] text-sky-600 font-medium">🟢 แตะเพื่อเข้าห้องนี้</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 bg-sky-100 text-sky-800 rounded-md border border-sky-200">${u.id}</span>
+                    </button>
+                `;
+            }).join('');
         };
 
-        // Execute Check-In
+        // Check-In Execution
         window.checkIn = async (userId, userName) => {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('th-TH');
+            const dateStr = now.toLocaleDateString('th-TH');
+
             try {
                 await addDoc(collection(db, "active_sessions"), {
                     userId,
                     userName,
                     room: currentRoom,
-                    checkInTime: new Date().toLocaleTimeString('th-TH'),
+                    checkInTime: timeStr,
+                    checkInDate: dateStr,
                     timestamp: serverTimestamp()
                 });
-                alert(`บันทึกเข้าห้อง ${currentRoom} เรียบร้อยแล้ว`);
+                alert(`บันทึกเวลาเข้าใช้งานห้อง "${currentRoom}" เรียบร้อยแล้ว\nเวลาเข้า: ${timeStr}`);
+                switchTab('active');
             } catch (e) {
-                alert("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
+                alert("เกิดข้อผิดพลาด: " + e.message);
             }
         };
 
         // Render Active Sessions
-        window.renderActiveSessions = (sessions) => {
+        window.renderActiveSessions = () => {
             const container = document.getElementById('activeSessionsList');
-            const wrapper = document.getElementById('activeSessionsContainer');
-
-            if (sessions.length === 0) {
-                wrapper.classList.add('hidden');
+            if (activeSessionsData.length === 0) {
+                container.innerHTML = `<p class="text-center py-8 text-slate-400 text-sm italic">ไม่มีผู้ใช้งานอยู่ในห้องปฏิบัติการขณะนี้</p>`;
                 return;
             }
-
-            wrapper.classList.remove('hidden');
-            container.innerHTML = sessions.map(s => `
-                <div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50/60 border border-amber-200/80 rounded-2xl flex items-center justify-between shadow-sm">
+            container.innerHTML = activeSessionsData.map(s => `
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
                     <div class="space-y-1">
-                        <span class="px-2 py-0.5 bg-amber-200/60 text-amber-900 rounded-md text-[10px] font-bold uppercase">${s.room}</span>
-                        <h4 class="font-bold text-slate-800 text-sm">${s.userName}</h4>
-                        <p class="text-xs text-slate-500"><i class="fa-regular fa-clock mr-1"></i>เวลาเข้า: ${s.checkInTime}</p>
+                        <span class="px-2.5 py-0.5 bg-sky-100 text-sky-800 rounded-md text-[11px] font-bold">${s.room}</span>
+                        <h4 class="font-bold text-slate-800 text-sm">${s.userName} (${s.userId})</h4>
+                        <p class="text-xs text-slate-500"><i class="fa-regular fa-clock text-sky-600 mr-1"></i>เวลาบันทึกเข้า: <strong>${s.checkInTime}</strong> (${s.checkInDate || ''})</p>
                     </div>
-                    <button onclick="openCheckoutModal('${s.id}', '${s.userName}', '${s.room}')" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition shadow-sm">
-                        คืนห้องแล็บ
+                    <button onclick="openCheckoutModal('${s.id}', '${s.userName}', '${s.room}', '${s.checkInTime}', '${s.checkInDate}')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition shadow-sm">
+                        เช็กเอาท์คืนห้อง
                     </button>
                 </div>
             `).join('');
         };
 
-        // Open Inspection Modal
-        window.openCheckoutModal = (sessionId, userName, roomName) => {
-            activeCheckoutSessionId = sessionId;
+        // Checkout Modal Logic
+        window.openCheckoutModal = (sessionId, userName, roomName, checkInTime, checkInDate) => {
+            activeCheckoutSession = { sessionId, userName, roomName, checkInTime, checkInDate };
             document.getElementById('modalUserName').innerText = userName;
             document.getElementById('modalRoomName').innerText = roomName;
+            document.getElementById('modalCheckInTime').innerText = checkInTime;
 
             const equipContainer = document.getElementById('modalEquipmentList');
             const roomEquip = (window.allEquipment || []).filter(e => e.room === roomName);
             equipmentStates = {};
 
             if (roomEquip.length === 0) {
-                equipContainer.innerHTML = `<p class="text-slate-400 text-xs italic py-2">ไม่มีรายการครุภัณฑ์บันทึกในห้องนี้ (สามารถเพิ่มได้ในโหมด Admin)</p>`;
+                equipContainer.innerHTML = `<p class="text-slate-400 text-xs italic py-2">ไม่มีรายการครุภัณฑ์บันทึกในห้องนี้</p>`;
             } else {
                 equipContainer.innerHTML = roomEquip.map(e => {
                     equipmentStates[e.docId] = 'normal';
                     return `
-                        <div class="flex items-center justify-between p-3 border border-slate-200 rounded-xl text-xs bg-slate-50/50">
+                        <div class="flex items-center justify-between p-3 border rounded-xl text-xs bg-slate-50">
                             <div>
                                 <strong class="text-slate-800 text-sm block">${e.name}</strong>
-                                <span class="text-slate-400 text-[11px]">เลขครุภัณฑ์: ${e.assetId}</span>
+                                <span class="text-slate-400">เลขครุภัณฑ์: ${e.assetId}</span>
                             </div>
                             <div class="flex space-x-1" id="btnGroup-${e.docId}">
-                                <button onclick="setEquipState('${e.docId}', 'normal')" class="px-3 py-1.5 rounded-lg bg-teal-600 text-white font-bold shadow-sm">🟢 ปกติ</button>
+                                <button onclick="setEquipState('${e.docId}', 'normal')" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">🟢 ปกติ</button>
                                 <button onclick="setEquipState('${e.docId}', 'issue')" class="px-3 py-1.5 rounded-lg bg-slate-200 text-slate-600">🔴 ชำรุด</button>
                             </div>
                         </div>
                     `;
                 }).join('');
             }
-
             document.getElementById('checkoutModal').classList.remove('hidden');
         };
 
@@ -493,13 +508,13 @@
             const container = document.getElementById(`btnGroup-${equipId}`);
             if(state === 'normal') {
                 container.innerHTML = `
-                    <button onclick="setEquipState('${equipId}', 'normal')" class="px-3 py-1.5 rounded-lg bg-teal-600 text-white font-bold shadow-sm">🟢 ปกติ</button>
+                    <button onclick="setEquipState('${equipId}', 'normal')" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">🟢 ปกติ</button>
                     <button onclick="setEquipState('${equipId}', 'issue')" class="px-3 py-1.5 rounded-lg bg-slate-200 text-slate-600">🔴 ชำรุด</button>
                 `;
             } else {
                 container.innerHTML = `
                     <button onclick="setEquipState('${equipId}', 'normal')" class="px-3 py-1.5 rounded-lg bg-slate-200 text-slate-600">🟢 ปกติ</button>
-                    <button onclick="setEquipState('${equipId}', 'issue')" class="px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold shadow-sm">🔴 ชำรุด</button>
+                    <button onclick="setEquipState('${equipId}', 'issue')" class="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold">🔴 ชำรุด</button>
                 `;
             }
         };
@@ -510,54 +525,75 @@
 
         window.confirmCheckout = async () => {
             try {
-                const uName = document.getElementById('modalUserName').innerText;
-                const rName = document.getElementById('modalRoomName').innerText;
+                const now = new Date();
+                const checkOutTime = now.toLocaleTimeString('th-TH');
 
+                // Record Complete Log
                 await addDoc(collection(db, "logs"), {
-                    userName: uName,
-                    room: rName,
-                    checkOutTime: new Date().toLocaleTimeString('th-TH'),
-                    date: new Date().toLocaleDateString('th-TH'),
+                    userName: activeCheckoutSession.userName,
+                    room: activeCheckoutSession.roomName,
+                    checkInTime: activeCheckoutSession.checkInTime,
+                    checkOutTime: checkOutTime,
+                    date: activeCheckoutSession.checkInDate || now.toLocaleDateString('th-TH'),
                     roomCheck: {
                         air: document.getElementById('chkAir').checked,
                         light: document.getElementById('chkLight').checked,
                         plug: document.getElementById('chkPlug').checked,
                         clean: document.getElementById('chkClean').checked
                     },
-                    equipmentStates
+                    equipmentStates,
+                    timestamp: serverTimestamp()
                 });
 
-                await deleteDoc(doc(db, "active_sessions", activeCheckoutSessionId));
+                // Delete Active Session
+                await deleteDoc(doc(db, "active_sessions", activeCheckoutSession.sessionId));
                 closeCheckoutModal();
-                alert("บันทึกการส่งคืนห้องปฏิบัติการเรียบร้อยแล้ว");
+                alert("บันทึกเวลาคืนห้องเรียบร้อยแล้ว");
+                switchTab('logs');
             } catch (e) {
                 alert("เกิดข้อผิดพลาด: " + e.message);
             }
         };
 
-        // Render History Logs Table
+        // Render History Logs (แสดงข้อมูลครบถ้วน)
         window.renderLogs = (logs) => {
             const container = document.getElementById('logsTableBody');
             if(logs.length === 0) {
-                container.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400 italic">ยังไม่มีประวัติการบันทึก</td></tr>`;
+                container.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 italic">ยังไม่มีประวัติการเข้าใช้งาน</td></tr>`;
                 return;
             }
-            container.innerHTML = logs.map(l => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="py-3 px-4 font-bold text-slate-800">${l.userName}</td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold">${l.room}</span></td>
-                    <td class="py-3 px-4 text-xs text-slate-500">${l.date}</td>
-                    <td class="py-3 px-4 text-xs text-slate-500">${l.checkOutTime}</td>
-                    <td class="py-3 px-4 text-center">
-                        <span class="px-2.5 py-1 bg-teal-50 text-teal-700 rounded-md text-xs font-bold border border-teal-200">
-                            ✓ สมบูรณ์
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
+            container.innerHTML = logs.map(l => {
+                const hasIssue = Object.values(l.equipmentStates || {}).includes('issue');
+                return `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-4 font-bold text-slate-800">${l.userName}</td>
+                        <td class="py-3 px-4"><span class="px-2 py-0.5 bg-sky-100 text-sky-800 rounded text-xs font-semibold">${l.room}</span></td>
+                        <td class="py-3 px-4 text-xs text-slate-500">${l.date}</td>
+                        <td class="py-3 px-4 text-xs text-emerald-600 font-bold">${l.checkInTime || '-'}</td>
+                        <td class="py-3 px-4 text-xs text-rose-600 font-bold">${l.checkOutTime || '-'}</td>
+                        <td class="py-3 px-4 text-xs text-slate-600">✓ เรียบร้อย</td>
+                        <td class="py-3 px-4 text-center">
+                            ${hasIssue ? 
+                                `<span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded text-xs font-bold">🔴 พบชำรุด</span>` : 
+                                `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">🟢 สมบูรณ์</span>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         };
 
-        // Admin Security & CRUD
+        // Tabs Controller
+        window.switchTab = (tab) => {
+            ['checkin', 'active', 'logs', 'admin'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-50";
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tab}`).className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 bg-sky-50 text-sky-700 shadow-sm border border-sky-200";
+        };
+
+        // Admin Auth
         window.verifyAdminPassword = () => {
             const pass = document.getElementById('adminPasswordInput').value;
             if (pass === "Rmsc4_admin") {
@@ -579,7 +615,7 @@
             const name = document.getElementById('newUserName').value.trim();
             if(!id || !name) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
 
-            await addDoc(collection(db, "users"), { id, name });
+            await addDoc(collection(db, "users"), { id, name, isOther: false });
             document.getElementById('newUserId').value = "";
             document.getElementById('newUserName').value = "";
             alert("เพิ่มรายชื่อผู้ใช้งานสำเร็จ");
@@ -594,7 +630,7 @@
             await addDoc(collection(db, "equipment"), { room, assetId, name });
             document.getElementById('newEquipAssetId').value = "";
             document.getElementById('newEquipName').value = "";
-            alert("เพิ่มรายการครุภัณฑ์เรียบร้อย");
+            alert("เพิ่มรายการครุภัณฑ์สำเร็จ");
         };
 
         window.renderAdminEquipment = () => {
@@ -605,12 +641,11 @@
             }
             container.innerHTML = window.allEquipment.map(e => `
                 <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-                    <div class="space-x-2">
-                        <span class="px-2 py-0.5 bg-brand-100 text-brand-800 rounded font-bold">${e.room}</span>
-                        <strong class="text-slate-800">${e.name}</strong>
-                        <span class="text-slate-400">(เลขครุภัณฑ์: ${e.assetId})</span>
+                    <div>
+                        <span class="px-2 py-0.5 bg-sky-100 text-sky-800 rounded font-bold mr-2">${e.room}</span>
+                        <strong class="text-slate-800">${e.name}</strong> (เลขครุภัณฑ์: ${e.assetId})
                     </div>
-                    <button onclick="deleteEquipment('${e.docId}')" class="text-red-500 hover:text-red-700 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="deleteEquipment('${e.docId}')" class="text-rose-500 hover:text-rose-700 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `).join('');
         };
