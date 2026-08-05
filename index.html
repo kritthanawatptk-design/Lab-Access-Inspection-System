@@ -10,16 +10,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts (Prompt) -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SheetJS (Library สำหรับ Export Excel) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Prompt', sans-serif; }
     </style>
 </head>
 <body class="h-full flex flex-col font-sans text-slate-800 bg-slate-100">
 
-    <!-- TOP NAV (NAVBAR แบบในภาพ) -->
+    <!-- TOP NAV HEADER -->
     <header class="bg-[#0f172a] text-white shadow-md sticky top-0 z-40 px-4 lg:px-8 py-2.5 border-b border-slate-800">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <!-- Logo & Brand -->
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center text-white text-xl shadow-lg shadow-sky-500/30">
                     <i class="fa-solid fa-flask-vial"></i>
@@ -30,17 +31,14 @@
                 </div>
             </div>
 
-            <!-- Quick Room Switcher & Admin Button -->
             <div class="flex items-center space-x-2">
-                <div class="relative">
-                    <select id="topRoomSelect" onchange="changeRoom(this.value)" class="bg-slate-800 text-slate-100 text-xs sm:text-sm font-medium px-3 py-2 pr-8 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer">
-                        <option value="Extraction Room (ห้องสกัดตัวอย่าง)">🧪 Extraction Room (ห้องสกัดตัวอย่าง)</option>
-                        <option value="Mastermix Preparation Room (ห้องเตรียมน้ำยา)">🧫 Mastermix Preparation Room (ห้องเตรียมน้ำยา)</option>
-                        <option value="Additive Room (ห้องเติม Template)">🧬 Additive Room (ห้องเติม Template)</option>
-                        <option value="Amplification Room (ห้องเพิ่มสารพันธุกรรม)">🔬 Amplification Room (ห้องเพิ่มสารพันธุกรรม)</option>
-                        <option value="Biosafety Level 3 (ห้อง BSL 3)">☣️ Biosafety Level 3 (ห้อง BSL 3)</option>
-                    </select>
-                </div>
+                <select id="topRoomSelect" onchange="changeRoom(this.value)" class="bg-slate-800 text-slate-100 text-xs sm:text-sm font-medium px-3 py-2 pr-8 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer">
+                    <option value="Extraction Room (ห้องสกัดตัวอย่าง)">🧪 Extraction Room (ห้องสกัดตัวอย่าง)</option>
+                    <option value="Mastermix Preparation Room (ห้องเตรียมน้ำยา)">🧫 Mastermix Preparation Room (ห้องเตรียมน้ำยา)</option>
+                    <option value="Additive Room (ห้องเติม Template)">🧬 Additive Room (ห้องเติม Template)</option>
+                    <option value="Amplification Room (ห้องเพิ่มสารพันธุกรรม)">🔬 Amplification Room (ห้องเพิ่มสารพันธุกรรม)</option>
+                    <option value="Biosafety Level 3 (ห้อง BSL 3)">☣️ Biosafety Level 3 (ห้อง BSL 3)</option>
+                </select>
                 <button onclick="switchTab('admin')" class="bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm font-medium px-3 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
                     <i class="fa-solid fa-sliders"></i>
                     <span>จัดการระบบ</span>
@@ -57,28 +55,27 @@
     <!-- MAIN CONTAINER -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
 
-        <!-- 1. CURRENT ROOM STATUS BANNER (ตรงตามภาพ) -->
-        <div class="bg-[#0f172a] rounded-2xl p-5 text-white shadow-xl relative overflow-hidden border border-slate-800">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+        <!-- 1. DASHBOARD BANNER แสดงสถานะรวมทุกห้อง (FEATURE 1) -->
+        <div class="bg-[#0f172a] rounded-2xl p-5 text-white shadow-xl relative overflow-hidden border border-slate-800 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
                 <div>
-                    <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-bold bg-sky-950 text-sky-400 border border-sky-800/60 mb-1.5">
-                        ห้องปฏิบัติการปัจจุบัน
-                    </span>
-                    <h2 id="bannerRoomName" class="text-xl sm:text-2xl font-bold tracking-tight text-white">Extraction Room (ห้องสกัดตัวอย่าง)</h2>
-                    <p class="text-xs text-slate-400 mt-1 flex items-center">
-                        <i class="fa-solid fa-location-dot mr-1.5 text-sky-400"></i>อาคารปฏิบัติการตรวจวิเคราะห์ ชั้น 1
-                    </p>
+                    <h2 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center">
+                        <i class="fa-solid fa-chart-pie text-sky-400 mr-2"></i>Dashboard สรุปสถานะการเข้าใช้ห้องปฏิบัติการทั้งหมด
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">คลิกที่การ์ดห้องเพื่อสลับไปบันทึกสแกนเข้าใช้งานห้องนั้นได้ทันที</p>
                 </div>
-                <div id="bannerStatusBadge">
-                    <span class="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold text-sm rounded-xl flex items-center space-x-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>พร้อมใช้งาน (ว่าง)</span>
-                    </span>
-                </div>
+                <span id="dashboardSummaryCount" class="text-xs font-semibold px-3 py-1 bg-slate-800 text-sky-400 rounded-full border border-slate-700 self-start sm:self-auto">
+                    กำลังโหลดข้อมูล...
+                </span>
+            </div>
+
+            <!-- Grid สรุปสถานะทั้ง 5 ห้อง -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" id="roomDashboardGrid">
+                <!-- Dynamic Room Dashboard Cards -->
             </div>
         </div>
 
-        <!-- 2. MAIN NAVIGATION TABS (4 แท็บตรงตามภาพ) -->
+        <!-- 2. MAIN NAVIGATION TABS -->
         <div class="bg-white rounded-2xl p-1.5 shadow-sm border border-slate-200/80 flex flex-wrap sm:flex-nowrap gap-1">
             <button onclick="switchTab('checkin')" id="tab-btn-checkin" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 bg-sky-50 text-sky-700 shadow-sm border border-sky-200">
                 <i class="fa-solid fa-grip text-sky-600"></i>
@@ -98,9 +95,8 @@
             </button>
         </div>
 
-        <!-- TAB CONTENT 1: TAP TO CHECK-IN -->
+        <!-- TAB CONTENT 1: CHECK-IN -->
         <div id="tab-checkin" class="space-y-4">
-            <!-- Selected Room Notification Box -->
             <div class="bg-sky-50 border border-sky-200 rounded-2xl p-4 flex items-center justify-between text-sky-900 text-xs sm:text-sm">
                 <div class="flex items-center space-x-3">
                     <div class="w-9 h-9 rounded-xl bg-sky-500 text-white flex items-center justify-center text-lg shadow-sm">
@@ -112,11 +108,10 @@
                     </div>
                 </div>
                 <span class="text-[11px] bg-white px-3 py-1 rounded-full border border-sky-200 text-sky-700 font-medium">
-                    <i class="fa-solid fa-circle-info mr-1"></i>เปลี่ยนห้องได้จากเมนูด้านบนสุด
+                    <i class="fa-solid fa-circle-info mr-1"></i>เปลี่ยนห้องได้จาก Dashboard หรือเมนูด้านบน
                 </span>
             </div>
 
-            <!-- User Quick Access Grid -->
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
@@ -129,36 +124,34 @@
                         <i class="fa-solid fa-bolt text-emerald-500 mr-1.5"></i>1-Tap Entry
                     </span>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5" id="userCardsGrid">
-                    <!-- Dynamic User Cards (ตรงตามภาพ) -->
-                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5" id="userCardsGrid"></div>
             </div>
         </div>
 
-        <!-- TAB CONTENT 2: ACTIVE SESSIONS & CHECK-OUT -->
+        <!-- TAB CONTENT 2: ACTIVE SESSIONS -->
         <div id="tab-active" class="hidden space-y-4">
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-users-viewfinder text-amber-500 mr-2"></i>ผู้กำลังใช้งานห้องปฏิบัติการขณะนี้</h3>
-                        <p class="text-xs text-slate-500">บันทึกเวลาเข้าสะสม และกดปุ่มเช็กเอาท์เพื่อบันทึกคืนห้อง</p>
-                    </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-users-viewfinder text-amber-500 mr-2"></i>ผู้กำลังใช้งานห้องปฏิบัติการขณะนี้</h3>
+                    <p class="text-xs text-slate-500">บันทึกเวลาเข้าสะสม และกดปุ่มเช็กเอาท์เพื่อบันทึกคืนห้อง</p>
                 </div>
-                <div id="activeSessionsList" class="space-y-3">
-                    <p class="text-center py-8 text-slate-400 text-sm italic">ไม่มีผู้ใช้งานอยู่ในห้องปฏิบัติการขณะนี้</p>
-                </div>
+                <div id="activeSessionsList" class="space-y-3"></div>
             </div>
         </div>
 
-        <!-- TAB CONTENT 3: HISTORY LOGS (ประวัติการใช้งานแบบครบถ้วน) -->
+        <!-- TAB CONTENT 3: HISTORY LOGS & EXPORT EXCEL (FEATURE 3) -->
         <div id="tab-logs" class="hidden space-y-4">
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-rectangle-list text-sky-600 mr-2"></i>ประวัติการเข้าใช้และบันทึกความพร้อมห้อง</h3>
-                        <p class="text-xs text-slate-500">แสดงข้อมูลเวลาเข้า-ออก และสถานะการตรวจเช็กครุภัณฑ์ถาวรบน Cloud</p>
+                        <p class="text-xs text-slate-500">แสดงข้อมูลเวลาเข้า-ออก และรายละเอียดการตรวจเช็กครุภัณฑ์ถาวรบน Cloud</p>
                     </div>
+                    <!-- ปุ่ม Export Excel -->
+                    <button onclick="exportLogsToExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 transition self-start sm:self-auto">
+                        <i class="fa-solid fa-file-excel text-base"></i>
+                        <span>ดึงประวัติออกมาเป็น Excel (.xlsx)</span>
+                    </button>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -170,21 +163,18 @@
                                 <th class="py-3 px-4">วันที่</th>
                                 <th class="py-3 px-4">เวลาเข้า</th>
                                 <th class="py-3 px-4">เวลาออก</th>
-                                <th class="py-3 px-4">ความเรียบร้อยห้อง</th>
                                 <th class="py-3 px-4 text-center">สถานะครุภัณฑ์</th>
+                                <th class="py-3 px-4 text-center">รายละเอียด</th>
                             </tr>
                         </thead>
-                        <tbody id="logsTableBody" class="divide-y divide-slate-100">
-                            <!-- Dynamic History Logs -->
-                        </tbody>
+                        <tbody id="logsTableBody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- TAB CONTENT 4: ADMIN MANAGEMENT -->
+        <!-- TAB CONTENT 4: ADMIN -->
         <div id="tab-admin" class="hidden space-y-5">
-            <!-- Auth Login Card -->
             <div id="adminAuthBox" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200/80 max-w-md mx-auto text-center space-y-4">
                 <div class="w-14 h-14 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center mx-auto text-2xl">
                     <i class="fa-solid fa-lock"></i>
@@ -199,14 +189,12 @@
                 </button>
             </div>
 
-            <!-- Admin Main Screen (Protected) -->
             <div id="adminMainContent" class="hidden space-y-5">
                 <div class="flex justify-between items-center bg-[#0f172a] text-white p-4 rounded-2xl">
                     <span class="text-xs sm:text-sm font-semibold text-sky-400"><i class="fa-solid fa-shield-halved mr-2"></i>โหมดผู้ดูแลระบบ (Admin Access)</span>
                     <button onclick="logoutAdmin()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300">ออกจากระบบ</button>
                 </div>
 
-                <!-- Add User -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
                     <h4 class="font-bold text-slate-800 text-sm">เพิ่มผู้มีสิทธิ์ใช้งานห้องปฏิบัติการ</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -218,7 +206,6 @@
                     </div>
                 </div>
 
-                <!-- Add Equipment -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
                     <h4 class="font-bold text-slate-800 text-sm">เพิ่มครุภัณฑ์และอุปกรณ์ประจำห้อง</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -244,7 +231,7 @@
         </div>
     </main>
 
-    <!-- CHECKOUT MODAL (บันทึกการออกจากห้อง & เช็กความพร้อม) -->
+    <!-- CHECKOUT MODAL -->
     <div id="checkoutModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
             <div class="p-5 bg-[#0f172a] text-white flex justify-between items-center">
@@ -296,12 +283,47 @@
         </div>
     </div>
 
-    <!-- Firebase Realtime Cloud SDK -->
+    <!-- LOG DETAIL MODAL (FEATURE 2: ดูรายละเอียดประวัติเชิงลึก) -->
+    <div id="logDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
+            <div class="p-5 bg-[#0f172a] text-white flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center">
+                    <i class="fa-solid fa-circle-info text-sky-400 mr-2"></i>รายละเอียดบันทึกการเข้าใช้ห้องปฏิบัติการ
+                </h3>
+                <button onclick="closeLogDetailModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs sm:text-sm">
+                <!-- Summary Card -->
+                <div class="bg-sky-50/60 border border-sky-100 p-4 rounded-2xl space-y-1">
+                    <p><strong class="text-slate-500">ผู้เข้าใช้งาน:</strong> <span id="detailUserName" class="font-bold text-slate-800">-</span></p>
+                    <p><strong class="text-slate-500">ห้องปฏิบัติการ:</strong> <span id="detailRoomName" class="font-bold text-sky-700">-</span></p>
+                    <p><strong class="text-slate-500">วันที่ใช้งาน:</strong> <span id="detailDate" class="font-medium text-slate-700">-</span></p>
+                    <p><strong class="text-slate-500">ช่วงเวลาเข้า - ออก:</strong> <span id="detailTimeRange" class="font-semibold text-emerald-700">-</span></p>
+                </div>
+
+                <!-- Room Inspection Details -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 border-b pb-1">1. รายการจัดเก็บความเรียบร้อยของห้อง</h4>
+                    <div class="grid grid-cols-2 gap-2 text-xs" id="detailRoomChecks"></div>
+                </div>
+
+                <!-- Equipment Status Details -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 border-b pb-1">2. สภาพครุภัณฑ์ประจำห้อง ณ เวลาส่งคืน</h4>
+                    <div class="space-y-1.5" id="detailEquipStates"></div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t flex justify-end">
+                <button onclick="closeLogDetailModal()" class="px-5 py-2 bg-slate-800 text-white rounded-xl font-medium text-xs">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK & Custom Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCISN7dBIIGqwfjYQFm_i1n1cC5fn-3L94",
             authDomain: "acclab-ecf70.firebaseapp.com",
@@ -316,6 +338,14 @@
         const db = getFirestore(app);
 
         let currentRoom = "Extraction Room (ห้องสกัดตัวอย่าง)";
+        let roomsList = [
+            "Extraction Room (ห้องสกัดตัวอย่าง)",
+            "Mastermix Preparation Room (ห้องเตรียมน้ำยา)",
+            "Additive Room (ห้องเติม Template)",
+            "Amplification Room (ห้องเพิ่มสารพันธุกรรม)",
+            "Biosafety Level 3 (ห้อง BSL 3)"
+        ];
+
         let defaultUsers = [
             { id: "LABPT-RMSC4-01", name: "ดร.ภัทรพล วงษ์ภูธร", isOther: false },
             { id: "LABPT-RMSC4-02", name: "นายปัญญ์ปิยะ รอบคอบ", isOther: false },
@@ -327,6 +357,7 @@
         let activeCheckoutSession = null;
         let equipmentStates = {};
         let activeSessionsData = [];
+        let allLogsData = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             // Realtime Active Sessions
@@ -336,7 +367,7 @@
 
                 activeSessionsData = [];
                 snapshot.forEach(doc => activeSessionsData.push({ id: doc.id, ...doc.data() }));
-                updateRoomStatusBanner();
+                renderRoomDashboard();
                 renderActiveSessions();
             });
 
@@ -356,41 +387,55 @@
 
             // Realtime Logs
             onSnapshot(collection(db, "logs"), (snapshot) => {
-                let logs = [];
-                snapshot.forEach(doc => logs.push(doc.data()));
-                renderLogs(logs);
+                allLogsData = [];
+                snapshot.forEach(doc => allLogsData.push(doc.data()));
+                renderLogs(allLogsData);
             });
         });
 
-        // Switch Room
-        window.changeRoom = (roomName) => {
-            currentRoom = roomName;
-            document.getElementById('bannerRoomName').innerText = roomName;
-            document.getElementById('infoRoomName').innerText = roomName;
-            updateRoomStatusBanner();
-        };
+        // 1. FEATURE: Render Room Dashboard Banner
+        function renderRoomDashboard() {
+            const container = document.getElementById('roomDashboardGrid');
+            let activeCount = 0;
 
-        function updateRoomStatusBanner() {
-            const inUse = activeSessionsData.find(s => s.room === currentRoom);
-            const container = document.getElementById('bannerStatusBadge');
-            if (inUse) {
-                container.innerHTML = `
-                    <span class="px-4 py-2 bg-amber-500/20 text-amber-400 border border-amber-500/40 font-bold text-sm rounded-xl flex items-center space-x-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-                        <span>มีผู้ใช้งานอยู่ (${inUse.userName})</span>
-                    </span>
+            container.innerHTML = roomsList.map(rName => {
+                const active = activeSessionsData.find(s => s.room === rName);
+                if (active) activeCount++;
+
+                const isSelected = rName === currentRoom;
+                const shortName = rName.split(' ')[0];
+
+                return `
+                    <div onclick="changeRoom('${rName}')" class="p-3 rounded-xl cursor-pointer transition border text-left flex flex-col justify-between ${isSelected ? 'ring-2 ring-sky-400 bg-slate-800/90' : 'bg-slate-800/40 hover:bg-slate-800/80'} border-slate-700/70">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 block truncate">${shortName}</span>
+                            <strong class="text-xs text-white block truncate font-medium">${rName.split('(')[1]?.replace(')', '') || rName}</strong>
+                        </div>
+                        <div class="mt-2.5">
+                            ${active ? 
+                                `<span class="inline-flex items-center text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 truncate w-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1 animate-pulse"></span>${active.userName.split(' ')[0]}
+                                 </span>` : 
+                                `<span class="inline-flex items-center text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1"></span>ว่าง
+                                 </span>`
+                            }
+                        </div>
+                    </div>
                 `;
-            } else {
-                container.innerHTML = `
-                    <span class="px-4 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold text-sm rounded-xl flex items-center space-x-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>พร้อมใช้งาน (ว่าง)</span>
-                    </span>
-                `;
-            }
+            }).join('');
+
+            document.getElementById('dashboardSummaryCount').innerText = `กำลังใช้งาน ${activeCount} / 5 ห้อง`;
         }
 
-        // Render Cards (ตรงตามภาพ)
+        window.changeRoom = (roomName) => {
+            currentRoom = roomName;
+            document.getElementById('topRoomSelect').value = roomName;
+            document.getElementById('infoRoomName').innerText = roomName;
+            renderRoomDashboard();
+        };
+
+        // Render User 1-Tap Cards
         window.renderUsers = (usersList) => {
             const container = document.getElementById('userCardsGrid');
             container.innerHTML = usersList.map(u => {
@@ -427,7 +472,7 @@
             }).join('');
         };
 
-        // Check-In Execution
+        // Check-In Function
         window.checkIn = async (userId, userName) => {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('th-TH');
@@ -442,7 +487,7 @@
                     checkInDate: dateStr,
                     timestamp: serverTimestamp()
                 });
-                alert(`บันทึกเวลาเข้าใช้งานห้อง "${currentRoom}" เรียบร้อยแล้ว\nเวลาเข้า: ${timeStr}`);
+                alert(`บันทึกเวลาเข้าใช้งานห้อง "${currentRoom}" เรียบร้อยแล้ว`);
                 switchTab('active');
             } catch (e) {
                 alert("เกิดข้อผิดพลาด: " + e.message);
@@ -528,7 +573,6 @@
                 const now = new Date();
                 const checkOutTime = now.toLocaleTimeString('th-TH');
 
-                // Record Complete Log
                 await addDoc(collection(db, "logs"), {
                     userName: activeCheckoutSession.userName,
                     room: activeCheckoutSession.roomName,
@@ -545,7 +589,6 @@
                     timestamp: serverTimestamp()
                 });
 
-                // Delete Active Session
                 await deleteDoc(doc(db, "active_sessions", activeCheckoutSession.sessionId));
                 closeCheckoutModal();
                 alert("บันทึกเวลาคืนห้องเรียบร้อยแล้ว");
@@ -555,14 +598,14 @@
             }
         };
 
-        // Render History Logs (แสดงข้อมูลครบถ้วน)
+        // Render History Table
         window.renderLogs = (logs) => {
             const container = document.getElementById('logsTableBody');
             if(logs.length === 0) {
                 container.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 italic">ยังไม่มีประวัติการเข้าใช้งาน</td></tr>`;
                 return;
             }
-            container.innerHTML = logs.map(l => {
+            container.innerHTML = logs.map((l, index) => {
                 const hasIssue = Object.values(l.equipmentStates || {}).includes('issue');
                 return `
                     <tr class="hover:bg-slate-50 transition">
@@ -571,19 +614,99 @@
                         <td class="py-3 px-4 text-xs text-slate-500">${l.date}</td>
                         <td class="py-3 px-4 text-xs text-emerald-600 font-bold">${l.checkInTime || '-'}</td>
                         <td class="py-3 px-4 text-xs text-rose-600 font-bold">${l.checkOutTime || '-'}</td>
-                        <td class="py-3 px-4 text-xs text-slate-600">✓ เรียบร้อย</td>
                         <td class="py-3 px-4 text-center">
                             ${hasIssue ? 
                                 `<span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded text-xs font-bold">🔴 พบชำรุด</span>` : 
                                 `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">🟢 สมบูรณ์</span>`
                             }
                         </td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="openLogDetailModal(${index})" class="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-lg text-xs font-bold border border-sky-200 transition">
+                                👁️ ดูรายละเอียด
+                            </button>
+                        </td>
                     </tr>
                 `;
             }).join('');
         };
 
-        // Tabs Controller
+        // 2. FEATURE: Open Detail Modal (ดูรายละเอียดประวัติฉบับเต็ม)
+        window.openLogDetailModal = (logIndex) => {
+            const log = allLogsData[logIndex];
+            if (!log) return;
+
+            document.getElementById('detailUserName').innerText = log.userName;
+            document.getElementById('detailRoomName').innerText = log.room;
+            document.getElementById('detailDate').innerText = log.date;
+            document.getElementById('detailTimeRange').innerText = `${log.checkInTime || '-'} น. ถึง ${log.checkOutTime || '-'} น.`;
+
+            // Room Checks
+            const rc = log.roomCheck || {};
+            document.getElementById('detailRoomChecks').innerHTML = `
+                <div class="p-2 border rounded-lg ${rc.air ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'}">✓ ปิดแอร์: ${rc.air ? 'เรียบร้อย' : 'ไม่สำเร็จ'}</div>
+                <div class="p-2 border rounded-lg ${rc.light ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'}">✓ ปิดไฟ: ${rc.light ? 'เรียบร้อย' : 'ไม่สำเร็จ'}</div>
+                <div class="p-2 border rounded-lg ${rc.plug ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'}">✓ ถอดปลั๊ก: ${rc.plug ? 'เรียบร้อย' : 'ไม่สำเร็จ'}</div>
+                <div class="p-2 border rounded-lg ${rc.clean ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'}">✓ ทำความสะอาด: ${rc.clean ? 'เรียบร้อย' : 'ไม่สำเร็จ'}</div>
+            `;
+
+            // Equipment Checks
+            const eqStates = log.equipmentStates || {};
+            const roomEquip = (window.allEquipment || []).filter(e => e.room === log.room);
+            const eqContainer = document.getElementById('detailEquipStates');
+
+            if (Object.keys(eqStates).length === 0) {
+                eqContainer.innerHTML = `<p class="text-slate-400 text-xs italic">ไม่มีบันทึกสถานะครุภัณฑ์ในรอบนี้</p>`;
+            } else {
+                eqContainer.innerHTML = Object.keys(eqStates).map(docId => {
+                    const equipItem = (window.allEquipment || []).find(e => e.docId === docId);
+                    const isNormal = eqStates[docId] === 'normal';
+                    return `
+                        <div class="flex items-center justify-between p-2 border rounded-lg text-xs ${isNormal ? 'bg-slate-50' : 'bg-rose-50 border-rose-200'}">
+                            <span><strong>${equipItem ? equipItem.name : 'ครุภัณฑ์'}</strong> ${equipItem ? `(${equipItem.assetId})` : ''}</span>
+                            <span class="font-bold ${isNormal ? 'text-emerald-600' : 'text-rose-600'}">${isNormal ? '🟢 ปกติ' : '🔴 ชำรุด'}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('logDetailModal').classList.remove('hidden');
+        };
+
+        window.closeLogDetailModal = () => {
+            document.getElementById('logDetailModal').classList.add('hidden');
+        };
+
+        // 3. FEATURE: Export Logs to Excel
+        window.exportLogsToExcel = () => {
+            if (allLogsData.length === 0) {
+                alert("ยังไม่มีข้อมูลประวัติให้ดึงออกเป็น Excel");
+                return;
+            }
+
+            const excelRows = allLogsData.map((l, idx) => ({
+                "ลำดับ": idx + 1,
+                "ชื่อผู้เข้าใช้งาน": l.userName,
+                "ห้องปฏิบัติการ": l.room,
+                "วันที่บันทึก": l.date,
+                "เวลาเข้า": l.checkInTime || '-',
+                "เวลาออก": l.checkOutTime || '-',
+                "การปิดแอร์": l.roomCheck?.air ? "เรียบร้อย" : "ไม่เรียบร้อย",
+                "การปิดไฟ": l.roomCheck?.light ? "เรียบร้อย" : "ไม่เรียบร้อย",
+                "การถอดปลั๊ก": l.roomCheck?.plug ? "เรียบร้อย" : "ไม่เรียบร้อย",
+                "ทำความสะอาด": l.roomCheck?.clean ? "เรียบร้อย" : "ไม่เรียบร้อย",
+                "สถานะอุปกรณ์": Object.values(l.equipmentStates || {}).includes('issue') ? "พบอุปกรณ์ชำรุด" : "อุปกรณ์ปกติทั้งหมด"
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(excelRows);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Lab_Access_Logs");
+
+            // Download File
+            const fileName = `Lab_Access_History_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+        };
+
+        // Tabs Switcher
         window.switchTab = (tab) => {
             ['checkin', 'active', 'logs', 'admin'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
