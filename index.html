@@ -55,7 +55,7 @@
     <!-- MAIN CONTAINER -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
 
-        <!-- 1. DASHBOARD BANNER แสดงสถานะรวมทุกห้อง (FEATURE 1) -->
+        <!-- DASHBOARD BANNER -->
         <div class="bg-[#0f172a] rounded-2xl p-5 text-white shadow-xl relative overflow-hidden border border-slate-800 space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
                 <div>
@@ -68,14 +68,10 @@
                     กำลังโหลดข้อมูล...
                 </span>
             </div>
-
-            <!-- Grid สรุปสถานะทั้ง 5 ห้อง -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" id="roomDashboardGrid">
-                <!-- Dynamic Room Dashboard Cards -->
-            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3" id="roomDashboardGrid"></div>
         </div>
 
-        <!-- 2. MAIN NAVIGATION TABS -->
+        <!-- MAIN NAVIGATION TABS -->
         <div class="bg-white rounded-2xl p-1.5 shadow-sm border border-slate-200/80 flex flex-wrap sm:flex-nowrap gap-1">
             <button onclick="switchTab('checkin')" id="tab-btn-checkin" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 bg-sky-50 text-sky-700 shadow-sm border border-sky-200">
                 <i class="fa-solid fa-grip text-sky-600"></i>
@@ -139,15 +135,14 @@
             </div>
         </div>
 
-        <!-- TAB CONTENT 3: HISTORY LOGS & EXPORT EXCEL (FEATURE 3) -->
+        <!-- TAB CONTENT 3: HISTORY LOGS -->
         <div id="tab-logs" class="hidden space-y-4">
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-rectangle-list text-sky-600 mr-2"></i>ประวัติการเข้าใช้และบันทึกความพร้อมห้อง</h3>
-                        <p class="text-xs text-slate-500">แสดงข้อมูลเวลาเข้า-ออก และรายละเอียดการตรวจเช็กครุภัณฑ์ถาวรบน Cloud</p>
+                        <p class="text-xs text-slate-500">แสดงข้อมูลเวลาเข้า-ออก รายงานความผิดปกติ และรายละเอียดการตรวจเช็กครุภัณฑ์</p>
                     </div>
-                    <!-- ปุ่ม Export Excel -->
                     <button onclick="exportLogsToExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 transition self-start sm:self-auto">
                         <i class="fa-solid fa-file-excel text-base"></i>
                         <span>ดึงประวัติออกมาเป็น Excel (.xlsx)</span>
@@ -231,7 +226,7 @@
         </div>
     </main>
 
-    <!-- CHECKOUT MODAL -->
+    <!-- CHECKOUT MODAL (เพิ่มช่องบันทึกความผิดปกติอื่นๆ) -->
     <div id="checkoutModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
             <div class="p-5 bg-[#0f172a] text-white flex justify-between items-center">
@@ -273,6 +268,14 @@
                     <h4 class="font-bold text-slate-700 mb-2">2. ประเมินความพร้อมครุภัณฑ์ประจำห้อง</h4>
                     <div id="modalEquipmentList" class="space-y-2"></div>
                 </div>
+
+                <!-- 🌟 3. เพิ่มช่องบันทึกความผิดปกติอื่นๆ (NEW FEATURE) -->
+                <div>
+                    <h4 class="font-bold text-slate-700 mb-2 flex items-center">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500 mr-1.5"></i>3. บันทึกความผิดปกติอื่นๆ หรือหมายเหตุ (หากมี)
+                    </h4>
+                    <textarea id="checkoutRemarks" rows="3" placeholder="ระบุข้อบกพร่อง ความเสียหาย หรือหมายเหตุเพิ่มเติมในห้องปฏิบัติการ (ถ้าไม่มีให้เว้นว่างไว้)..." class="w-full p-3 border border-slate-300 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-sky-500 outline-none resize-none bg-slate-50/50"></textarea>
+                </div>
             </div>
             <div class="p-4 bg-slate-50 border-t flex justify-end space-x-2">
                 <button onclick="closeCheckoutModal()" class="px-4 py-2 border rounded-xl font-medium hover:bg-slate-100">ยกเลิก</button>
@@ -283,7 +286,7 @@
         </div>
     </div>
 
-    <!-- LOG DETAIL MODAL (FEATURE 2: ดูรายละเอียดประวัติเชิงลึก) -->
+    <!-- LOG DETAIL MODAL -->
     <div id="logDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
             <div class="p-5 bg-[#0f172a] text-white flex justify-between items-center">
@@ -293,7 +296,6 @@
                 <button onclick="closeLogDetailModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs sm:text-sm">
-                <!-- Summary Card -->
                 <div class="bg-sky-50/60 border border-sky-100 p-4 rounded-2xl space-y-1">
                     <p><strong class="text-slate-500">ผู้เข้าใช้งาน:</strong> <span id="detailUserName" class="font-bold text-slate-800">-</span></p>
                     <p><strong class="text-slate-500">ห้องปฏิบัติการ:</strong> <span id="detailRoomName" class="font-bold text-sky-700">-</span></p>
@@ -301,16 +303,24 @@
                     <p><strong class="text-slate-500">ช่วงเวลาเข้า - ออก:</strong> <span id="detailTimeRange" class="font-semibold text-emerald-700">-</span></p>
                 </div>
 
-                <!-- Room Inspection Details -->
                 <div class="space-y-2">
                     <h4 class="font-bold text-slate-800 border-b pb-1">1. รายการจัดเก็บความเรียบร้อยของห้อง</h4>
                     <div class="grid grid-cols-2 gap-2 text-xs" id="detailRoomChecks"></div>
                 </div>
 
-                <!-- Equipment Status Details -->
                 <div class="space-y-2">
                     <h4 class="font-bold text-slate-800 border-b pb-1">2. สภาพครุภัณฑ์ประจำห้อง ณ เวลาส่งคืน</h4>
                     <div class="space-y-1.5" id="detailEquipStates"></div>
+                </div>
+
+                <!-- แสดงบันทึกความผิดปกติในป๊อปอัพรายละเอียด -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 border-b pb-1 flex items-center text-amber-600">
+                        <i class="fa-solid fa-triangle-exclamation mr-1.5"></i>3. บันทึกความผิดปกติอื่นๆ / หมายเหตุ
+                    </h4>
+                    <div id="detailRemarksBox" class="p-3 rounded-xl border bg-slate-50 text-slate-700 text-xs italic">
+                        - ไม่มีบันทึกความผิดปกติเพิ่มเติม -
+                    </div>
                 </div>
             </div>
             <div class="p-4 bg-slate-50 border-t flex justify-end">
@@ -360,7 +370,6 @@
         let allLogsData = [];
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Realtime Active Sessions
             onSnapshot(collection(db, "active_sessions"), (snapshot) => {
                 document.getElementById('connectionStatus').className = "bg-emerald-100 text-emerald-800 text-xs py-1.5 text-center font-medium border-b border-emerald-200";
                 document.getElementById('connectionStatus').innerHTML = '<i class="fa-solid fa-cloud-check mr-1.5"></i>เชื่อมต่อฐานข้อมูล Cloud (Acclab Firebase) เรียลไทม์สมบูรณ์';
@@ -371,21 +380,18 @@
                 renderActiveSessions();
             });
 
-            // Realtime Users
             onSnapshot(collection(db, "users"), (snapshot) => {
                 let dbUsers = [];
                 snapshot.forEach(doc => dbUsers.push({ docId: doc.id, ...doc.data() }));
                 renderUsers([...defaultUsers, ...dbUsers]);
             });
 
-            // Realtime Equipment
             onSnapshot(collection(db, "equipment"), (snapshot) => {
                 window.allEquipment = [];
                 snapshot.forEach(doc => window.allEquipment.push({ docId: doc.id, ...doc.data() }));
                 renderAdminEquipment();
             });
 
-            // Realtime Logs
             onSnapshot(collection(db, "logs"), (snapshot) => {
                 allLogsData = [];
                 snapshot.forEach(doc => allLogsData.push(doc.data()));
@@ -393,7 +399,6 @@
             });
         });
 
-        // 1. FEATURE: Render Room Dashboard Banner
         function renderRoomDashboard() {
             const container = document.getElementById('roomDashboardGrid');
             let activeCount = 0;
@@ -401,7 +406,6 @@
             container.innerHTML = roomsList.map(rName => {
                 const active = activeSessionsData.find(s => s.room === rName);
                 if (active) activeCount++;
-
                 const isSelected = rName === currentRoom;
                 const shortName = rName.split(' ')[0];
 
@@ -435,7 +439,6 @@
             renderRoomDashboard();
         };
 
-        // Render User 1-Tap Cards
         window.renderUsers = (usersList) => {
             const container = document.getElementById('userCardsGrid');
             container.innerHTML = usersList.map(u => {
@@ -472,7 +475,6 @@
             }).join('');
         };
 
-        // Check-In Function
         window.checkIn = async (userId, userName) => {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('th-TH');
@@ -494,7 +496,6 @@
             }
         };
 
-        // Render Active Sessions
         window.renderActiveSessions = () => {
             const container = document.getElementById('activeSessionsList');
             if (activeSessionsData.length === 0) {
@@ -515,12 +516,12 @@
             `).join('');
         };
 
-        // Checkout Modal Logic
         window.openCheckoutModal = (sessionId, userName, roomName, checkInTime, checkInDate) => {
             activeCheckoutSession = { sessionId, userName, roomName, checkInTime, checkInDate };
             document.getElementById('modalUserName').innerText = userName;
             document.getElementById('modalRoomName').innerText = roomName;
             document.getElementById('modalCheckInTime').innerText = checkInTime;
+            document.getElementById('checkoutRemarks').value = ""; // เคลียร์ช่องหมายเหตุ
 
             const equipContainer = document.getElementById('modalEquipmentList');
             const roomEquip = (window.allEquipment || []).filter(e => e.room === roomName);
@@ -572,6 +573,7 @@
             try {
                 const now = new Date();
                 const checkOutTime = now.toLocaleTimeString('th-TH');
+                const remarks = document.getElementById('checkoutRemarks').value.trim();
 
                 await addDoc(collection(db, "logs"), {
                     userName: activeCheckoutSession.userName,
@@ -586,6 +588,7 @@
                         clean: document.getElementById('chkClean').checked
                     },
                     equipmentStates,
+                    remarks: remarks || "-",
                     timestamp: serverTimestamp()
                 });
 
@@ -598,7 +601,6 @@
             }
         };
 
-        // Render History Table
         window.renderLogs = (logs) => {
             const container = document.getElementById('logsTableBody');
             if(logs.length === 0) {
@@ -606,7 +608,7 @@
                 return;
             }
             container.innerHTML = logs.map((l, index) => {
-                const hasIssue = Object.values(l.equipmentStates || {}).includes('issue');
+                const hasIssue = Object.values(l.equipmentStates || {}).includes('issue') || (l.remarks && l.remarks !== "-");
                 return `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="py-3 px-4 font-bold text-slate-800">${l.userName}</td>
@@ -616,7 +618,7 @@
                         <td class="py-3 px-4 text-xs text-rose-600 font-bold">${l.checkOutTime || '-'}</td>
                         <td class="py-3 px-4 text-center">
                             ${hasIssue ? 
-                                `<span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded text-xs font-bold">🔴 พบชำรุด</span>` : 
+                                `<span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded text-xs font-bold">🔴 มีข้อสังเกต</span>` : 
                                 `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">🟢 สมบูรณ์</span>`
                             }
                         </td>
@@ -630,7 +632,6 @@
             }).join('');
         };
 
-        // 2. FEATURE: Open Detail Modal (ดูรายละเอียดประวัติฉบับเต็ม)
         window.openLogDetailModal = (logIndex) => {
             const log = allLogsData[logIndex];
             if (!log) return;
@@ -640,7 +641,6 @@
             document.getElementById('detailDate').innerText = log.date;
             document.getElementById('detailTimeRange').innerText = `${log.checkInTime || '-'} น. ถึง ${log.checkOutTime || '-'} น.`;
 
-            // Room Checks
             const rc = log.roomCheck || {};
             document.getElementById('detailRoomChecks').innerHTML = `
                 <div class="p-2 border rounded-lg ${rc.air ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'}">✓ ปิดแอร์: ${rc.air ? 'เรียบร้อย' : 'ไม่สำเร็จ'}</div>
@@ -649,9 +649,7 @@
                 <div class="p-2 border rounded-lg ${rc.clean ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'}">✓ ทำความสะอาด: ${rc.clean ? 'เรียบร้อย' : 'ไม่สำเร็จ'}</div>
             `;
 
-            // Equipment Checks
             const eqStates = log.equipmentStates || {};
-            const roomEquip = (window.allEquipment || []).filter(e => e.room === log.room);
             const eqContainer = document.getElementById('detailEquipStates');
 
             if (Object.keys(eqStates).length === 0) {
@@ -669,6 +667,16 @@
                 }).join('');
             }
 
+            // แสดงช่องบันทึกความผิดปกติ
+            const remarksBox = document.getElementById('detailRemarksBox');
+            if (log.remarks && log.remarks !== "-") {
+                remarksBox.className = "p-3 rounded-xl border bg-amber-50 border-amber-200 text-amber-900 text-xs font-medium";
+                remarksBox.innerHTML = `<i class="fa-solid fa-comment-dots mr-1.5 text-amber-600"></i>${log.remarks}`;
+            } else {
+                remarksBox.className = "p-3 rounded-xl border bg-slate-50 text-slate-400 text-xs italic";
+                remarksBox.innerHTML = "- ไม่มีบันทึกความผิดปกติเพิ่มเติม -";
+            }
+
             document.getElementById('logDetailModal').classList.remove('hidden');
         };
 
@@ -676,7 +684,6 @@
             document.getElementById('logDetailModal').classList.add('hidden');
         };
 
-        // 3. FEATURE: Export Logs to Excel
         window.exportLogsToExcel = () => {
             if (allLogsData.length === 0) {
                 alert("ยังไม่มีข้อมูลประวัติให้ดึงออกเป็น Excel");
@@ -694,19 +701,18 @@
                 "การปิดไฟ": l.roomCheck?.light ? "เรียบร้อย" : "ไม่เรียบร้อย",
                 "การถอดปลั๊ก": l.roomCheck?.plug ? "เรียบร้อย" : "ไม่เรียบร้อย",
                 "ทำความสะอาด": l.roomCheck?.clean ? "เรียบร้อย" : "ไม่เรียบร้อย",
-                "สถานะอุปกรณ์": Object.values(l.equipmentStates || {}).includes('issue') ? "พบอุปกรณ์ชำรุด" : "อุปกรณ์ปกติทั้งหมด"
+                "สถานะอุปกรณ์": Object.values(l.equipmentStates || {}).includes('issue') ? "พบอุปกรณ์ชำรุด" : "อุปกรณ์ปกติทั้งหมด",
+                "บันทึกความผิดปกติเพิ่มเติม/หมายเหตุ": l.remarks || "-"
             }));
 
             const worksheet = XLSX.utils.json_to_sheet(excelRows);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Lab_Access_Logs");
 
-            // Download File
             const fileName = `Lab_Access_History_${new Date().toISOString().slice(0, 10)}.xlsx`;
             XLSX.writeFile(workbook, fileName);
         };
 
-        // Tabs Switcher
         window.switchTab = (tab) => {
             ['checkin', 'active', 'logs', 'admin'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
@@ -716,7 +722,6 @@
             document.getElementById(`tab-btn-${tab}`).className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-2 bg-sky-50 text-sky-700 shadow-sm border border-sky-200";
         };
 
-        // Admin Auth
         window.verifyAdminPassword = () => {
             const pass = document.getElementById('adminPasswordInput').value;
             if (pass === "Rmsc4_admin") {
