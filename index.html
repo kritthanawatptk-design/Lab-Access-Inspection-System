@@ -33,12 +33,7 @@
 
             <div class="flex items-center space-x-2">
                 <select id="topRoomSelect" onchange="changeRoom(this.value)" class="bg-slate-800 text-slate-100 text-xs sm:text-sm font-medium px-3 py-2 pr-8 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer">
-                    <option value="Extraction Room (ห้องสกัดตัวอย่าง)">🧪 Extraction Room (ห้องสกัดตัวอย่าง)</option>
-                    <option value="Mastermix Preparation Room (ห้องเตรียมน้ำยา)">🧫 Mastermix Preparation Room (ห้องเตรียมน้ำยา)</option>
-                    <option value="Additive Room (ห้องเติม Template)">🧬 Additive Room (ห้องเติม Template)</option>
-                    <option value="Amplification Room (ห้องเพิ่มสารพันธุกรรม)">🔬 Amplification Room (ห้องเพิ่มสารพันธุกรรม)</option>
-                    <option value="Biosafety Level 3 (ห้อง BSL 3)">☣️ Biosafety Level 3 (ห้อง BSL 3)</option>
-                    <option value="Washing & Cleaning Room (ห้องซักล้าง)">🧼 Washing & Cleaning Room (ห้องซักล้าง)</option>
+                    <!-- Dynamic Top Rooms List -->
                 </select>
                 <button onclick="switchTab('admin')" class="bg-sky-600 hover:bg-sky-500 text-white text-xs sm:text-sm font-medium px-3 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-sm">
                     <i class="fa-solid fa-sliders"></i>
@@ -101,7 +96,7 @@
                     </div>
                     <div>
                         <p class="text-[11px] text-sky-600 font-semibold">ห้องปฏิบัติการที่เลือกสแกนเข้า:</p>
-                        <strong id="infoRoomName" class="text-sm sm:text-base font-bold text-sky-950">Extraction Room (ห้องสกัดตัวอย่าง)</strong>
+                        <strong id="infoRoomName" class="text-sm sm:text-base font-bold text-sky-950">-</strong>
                     </div>
                 </div>
                 <span class="text-[11px] bg-white px-3 py-1 rounded-full border border-sky-200 text-sky-700 font-medium">
@@ -136,7 +131,7 @@
             </div>
         </div>
 
-        <!-- TAB CONTENT 3: HISTORY LOGS -->
+        <!-- TAB CONTENT 3: HISTORY LOGS WITH FILTER & SORT -->
         <div id="tab-logs" class="hidden space-y-4">
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -148,6 +143,37 @@
                         <i class="fa-solid fa-file-excel text-base"></i>
                         <span>ดึงประวัติออกมาเป็น Excel (.xlsx)</span>
                     </button>
+                </div>
+
+                <!-- แถบตัวกรอง (FILTER & SORT CONTROL BAR) -->
+                <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                    <div>
+                        <label class="block text-slate-500 font-semibold mb-1"><i class="fa-solid fa-filter mr-1 text-sky-600"></i>กรองตามห้องปฏิบัติการ:</label>
+                        <select id="filterRoom" onchange="applyLogsFilter()" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-medium focus:ring-2 focus:ring-sky-500 outline-none">
+                            <option value="all">ทุกห้องปฏิบัติการ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 font-semibold mb-1"><i class="fa-solid fa-user mr-1 text-sky-600"></i>กรองตามชื่อผู้ใช้งาน:</label>
+                        <select id="filterUser" onchange="applyLogsFilter()" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-medium focus:ring-2 focus:ring-sky-500 outline-none">
+                            <option value="all">ผู้ใช้งานทั้งหมด</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 font-semibold mb-1"><i class="fa-solid fa-circle-check mr-1 text-sky-600"></i>สถานะครุภัณฑ์:</label>
+                        <select id="filterStatus" onchange="applyLogsFilter()" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-medium focus:ring-2 focus:ring-sky-500 outline-none">
+                            <option value="all">ทุกสถานะ</option>
+                            <option value="issue">🔴 มีข้อสังเกต / ชำรุด</option>
+                            <option value="normal">🟢 สมบูรณ์ปกติ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-500 font-semibold mb-1"><i class="fa-solid fa-arrow-down-up-wide mr-1 text-sky-600"></i>จัดเรียงตามวันที่/เวลา:</label>
+                        <select id="sortOrder" onchange="applyLogsFilter()" class="w-full p-2 rounded-lg border border-slate-300 bg-white font-medium focus:ring-2 focus:ring-sky-500 outline-none">
+                            <option value="desc">⏱️ ล่าสุด ➔ เก่าสุด</option>
+                            <option value="asc">⏱️ เก่าสุด ➔ ล่าสุด</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -177,7 +203,7 @@
                 </div>
                 <div>
                     <h3 class="text-base font-bold text-slate-800">ยืนยันสิทธิ์ผู้ดูแลระบบ (Admin)</h3>
-                    <p class="text-xs text-slate-500 mt-1">กรอกรหัสผ่านเพื่อเข้าสู่หน้าจัดการบุคลากรและครุภัณฑ์</p>
+                    <p class="text-xs text-slate-500 mt-1">กรอกรหัสผ่านเพื่อเข้าสู่หน้าจัดการบุคลากร ห้องปฏิบัติการ และครุภัณฑ์</p>
                 </div>
                 <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่าน (Rmsc4_admin)" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-center text-sm focus:ring-2 focus:ring-sky-500 outline-none">
                 <button onclick="verifyAdminPassword()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-medium rounded-xl text-sm transition shadow-md shadow-sky-500/20">
@@ -191,6 +217,24 @@
                     <button onclick="logoutAdmin()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300">ออกจากระบบ</button>
                 </div>
 
+                <!-- 🌟 เพิ่มระบบจัดการห้องปฏิบัติการ (NEW FEATURE 2: ADD LAB ROOM) -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+                    <h4 class="font-bold text-slate-800 text-sm flex items-center">
+                        <i class="fa-solid fa-door-plus text-sky-600 mr-2"></i>จัดการเพิ่มห้องปฏิบัติการในระบบ
+                    </h4>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input type="text" id="newRoomName" placeholder="ระบุชื่อห้องปฏิบัติการใหม่ (เช่น Clean Room, QC Room)" class="flex-1 px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm">
+                        <button onclick="addNewRoom()" class="bg-sky-600 hover:bg-sky-500 text-white font-medium py-2 px-5 rounded-xl text-xs sm:text-sm transition shadow-sm">
+                            + เพิ่มห้องปฏิบัติการ
+                        </button>
+                    </div>
+                    <div class="pt-2">
+                        <h5 class="text-xs font-bold text-slate-400 uppercase mb-2">รายชื่อห้องปฏิบัติการปัจจุบัน</h5>
+                        <div id="adminRoomsList" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+
+                <!-- Manage Users -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
                     <h4 class="font-bold text-slate-800 text-sm">เพิ่มผู้มีสิทธิ์ใช้งานห้องปฏิบัติการ</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -202,16 +246,12 @@
                     </div>
                 </div>
 
+                <!-- Manage Equipment -->
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
                     <h4 class="font-bold text-slate-800 text-sm">เพิ่มครุภัณฑ์และอุปกรณ์ประจำห้อง</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                         <select id="equipRoomSelect" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm bg-white">
-                            <option value="Extraction Room (ห้องสกัดตัวอย่าง)">Extraction Room</option>
-                            <option value="Mastermix Preparation Room (ห้องเตรียมน้ำยา)">Mastermix Preparation Room</option>
-                            <option value="Additive Room (ห้องเติม Template)">Additive Room</option>
-                            <option value="Amplification Room (ห้องเพิ่มสารพันธุกรรม)">Amplification Room</option>
-                            <option value="Biosafety Level 3 (ห้อง BSL 3)">BSL 3</option>
-                            <option value="Washing & Cleaning Room (ห้องซักล้าง)">Washing & Cleaning Room</option>
+                            <!-- Dynamic Room Select for Equipment -->
                         </select>
                         <input type="text" id="newEquipAssetId" placeholder="เลขครุภัณฑ์" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm">
                         <input type="text" id="newEquipName" placeholder="ชื่ออุปกรณ์ / เครื่องมือ" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs sm:text-sm">
@@ -347,8 +387,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let currentRoom = "Extraction Room (ห้องสกัดตัวอย่าง)";
-        let roomsList = [
+        let defaultRooms = [
             "Extraction Room (ห้องสกัดตัวอย่าง)",
             "Mastermix Preparation Room (ห้องเตรียมน้ำยา)",
             "Additive Room (ห้องเติม Template)",
@@ -356,6 +395,9 @@
             "Biosafety Level 3 (ห้อง BSL 3)",
             "Washing & Cleaning Room (ห้องซักล้าง)"
         ];
+
+        let roomsList = [...defaultRooms];
+        let currentRoom = roomsList[0];
 
         let defaultUsers = [
             { id: "LABPT-RMSC4-01", name: "ดร.ภัทรพล วงษ์ภูธร", isOther: false },
@@ -369,8 +411,21 @@
         let equipmentStates = {};
         let activeSessionsData = [];
         let allLogsData = [];
+        let filteredLogsData = [];
 
         window.addEventListener('DOMContentLoaded', () => {
+            // Realtime Rooms
+            onSnapshot(collection(db, "custom_rooms"), (snapshot) => {
+                let dbRooms = [];
+                snapshot.forEach(doc => dbRooms.push({ docId: doc.id, ...doc.data() }));
+                const customNames = dbRooms.map(r => r.name);
+                roomsList = Array.from(new Set([...defaultRooms, ...customNames]));
+                if(!roomsList.includes(currentRoom)) currentRoom = roomsList[0];
+                updateAllRoomDropdowns(dbRooms);
+                renderRoomDashboard();
+            });
+
+            // Realtime Active Sessions
             onSnapshot(collection(db, "active_sessions"), (snapshot) => {
                 document.getElementById('connectionStatus').className = "bg-emerald-100 text-emerald-800 text-xs py-1.5 text-center font-medium border-b border-emerald-200";
                 document.getElementById('connectionStatus').innerHTML = '<i class="fa-solid fa-cloud-check mr-1.5"></i>เชื่อมต่อฐานข้อมูล Cloud (Acclab Firebase) เรียลไทม์สมบูรณ์';
@@ -381,24 +436,81 @@
                 renderActiveSessions();
             });
 
+            // Realtime Users
             onSnapshot(collection(db, "users"), (snapshot) => {
                 let dbUsers = [];
                 snapshot.forEach(doc => dbUsers.push({ docId: doc.id, ...doc.data() }));
-                renderUsers([...defaultUsers, ...dbUsers]);
+                const allUsers = [...defaultUsers, ...dbUsers];
+                renderUsers(allUsers);
+                populateUserFilterDropdown(allUsers);
             });
 
+            // Realtime Equipment
             onSnapshot(collection(db, "equipment"), (snapshot) => {
                 window.allEquipment = [];
                 snapshot.forEach(doc => window.allEquipment.push({ docId: doc.id, ...doc.data() }));
                 renderAdminEquipment();
             });
 
+            // Realtime Logs
             onSnapshot(collection(db, "logs"), (snapshot) => {
                 allLogsData = [];
                 snapshot.forEach(doc => allLogsData.push(doc.data()));
-                renderLogs(allLogsData);
+                applyLogsFilter();
             });
         });
+
+        function updateAllRoomDropdowns(dbRooms) {
+            // Top Nav Select
+            const topSelect = document.getElementById('topRoomSelect');
+            topSelect.innerHTML = roomsList.map(r => `<option value="${r}">${r}</option>`).join('');
+            topSelect.value = currentRoom;
+            document.getElementById('infoRoomName').innerText = currentRoom;
+
+            // Filter Room Select
+            const filterSelect = document.getElementById('filterRoom');
+            const currentFilter = filterSelect.value || 'all';
+            filterSelect.innerHTML = `<option value="all">ทุกห้องปฏิบัติการ</option>` + roomsList.map(r => `<option value="${r}">${r}</option>`).join('');
+            filterSelect.value = currentFilter;
+
+            // Equip Room Select
+            const equipSelect = document.getElementById('equipRoomSelect');
+            equipSelect.innerHTML = roomsList.map(r => `<option value="${r}">${r}</option>`).join('');
+
+            // Admin Rooms List Render
+            const adminRoomsContainer = document.getElementById('adminRoomsList');
+            if (dbRooms.length === 0) {
+                adminRoomsContainer.innerHTML = `<span class="text-slate-400 text-xs italic">ใช้ชุดห้องเริ่มต้นจากระบบ (สามารถเพิ่มห้องใหม่เพิ่มได้)</span>`;
+            } else {
+                adminRoomsContainer.innerHTML = dbRooms.map(r => `
+                    <span class="inline-flex items-center px-3 py-1 bg-sky-50 text-sky-800 rounded-lg text-xs font-semibold border border-sky-200">
+                        ${r.name}
+                        <button onclick="deleteRoom('${r.docId}')" class="ml-2 text-rose-500 hover:text-rose-700 font-bold"><i class="fa-solid fa-xmark"></i></button>
+                    </span>
+                `).join('');
+            }
+        }
+
+        window.addNewRoom = async () => {
+            const name = document.getElementById('newRoomName').value.trim();
+            if(!name) return alert("กรุณาระบุชื่อห้องปฏิบัติการใหม่");
+            if(roomsList.includes(name)) return alert("มีห้องชื่อนี้อยู่ในระบบแล้ว");
+
+            await addDoc(collection(db, "custom_rooms"), { name, timestamp: serverTimestamp() });
+            document.getElementById('newRoomName').value = "";
+            alert("เพิ่มห้องปฏิบัติการเรียบร้อยแล้ว");
+        };
+
+        window.deleteRoom = async (docId) => {
+            if(confirm("ยืนยันการลบห้องปฏิบัติการนี้?")) {
+                await deleteDoc(doc(db, "custom_rooms", docId));
+            }
+        };
+
+        function populateUserFilterDropdown(users) {
+            const select = document.getElementById('filterUser');
+            select.innerHTML = `<option value="all">ผู้ใช้งานทั้งหมด</option>` + users.map(u => `<option value="${u.name}">${u.name}</option>`).join('');
+        }
 
         function renderRoomDashboard() {
             const container = document.getElementById('roomDashboardGrid');
@@ -602,10 +714,47 @@
             }
         };
 
-        window.renderLogs = (logs) => {
+        // 🌟 LOGIC กรองและจัดเรียงตามวันที่/เวลาล่าสุด (NEW TIMESTAMP SORTING)
+        window.applyLogsFilter = () => {
+            const fRoom = document.getElementById('filterRoom').value;
+            const fUser = document.getElementById('filterUser').value;
+            const fStatus = document.getElementById('filterStatus').value;
+            const sOrder = document.getElementById('sortOrder').value;
+
+            filteredLogsData = allLogsData.filter(l => {
+                const matchRoom = (fRoom === 'all') || (l.room === fRoom);
+                const matchUser = (fUser === 'all') || (l.userName === fUser);
+                const hasIssue = Object.values(l.equipmentStates || {}).includes('issue') || (l.remarks && l.remarks !== "-");
+                
+                let matchStatus = true;
+                if (fStatus === 'issue') matchStatus = hasIssue;
+                if (fStatus === 'normal') matchStatus = !hasIssue;
+
+                return matchRoom && matchUser && matchStatus;
+            });
+
+            // Precise Date & Time Sorting
+            filteredLogsData.sort((a, b) => {
+                const getMillis = (item) => {
+                    if (item.timestamp && item.timestamp.seconds) {
+                        return item.timestamp.seconds * 1000;
+                    }
+                    return 0;
+                };
+
+                const timeA = getMillis(a);
+                const timeB = getMillis(b);
+
+                return sOrder === 'desc' ? timeB - timeA : timeA - timeB;
+            });
+
+            renderLogs(filteredLogsData);
+        };
+
+        function renderLogs(logs) {
             const container = document.getElementById('logsTableBody');
             if(logs.length === 0) {
-                container.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 italic">ยังไม่มีประวัติการเข้าใช้งาน</td></tr>`;
+                container.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 italic">ไม่พบประวัติการเข้าใช้งานตามเงื่อนไขที่เลือก</td></tr>`;
                 return;
             }
             container.innerHTML = logs.map((l, index) => {
@@ -614,7 +763,7 @@
                     <tr class="hover:bg-slate-50 transition">
                         <td class="py-3 px-4 font-bold text-slate-800">${l.userName}</td>
                         <td class="py-3 px-4"><span class="px-2 py-0.5 bg-sky-100 text-sky-800 rounded text-xs font-semibold">${l.room}</span></td>
-                        <td class="py-3 px-4 text-xs text-slate-500">${l.date}</td>
+                        <td class="py-3 px-4 text-xs text-slate-500 font-medium">${l.date}</td>
                         <td class="py-3 px-4 text-xs text-emerald-600 font-bold">${l.checkInTime || '-'}</td>
                         <td class="py-3 px-4 text-xs text-rose-600 font-bold">${l.checkOutTime || '-'}</td>
                         <td class="py-3 px-4 text-center">
@@ -631,10 +780,10 @@
                     </tr>
                 `;
             }).join('');
-        };
+        }
 
-        window.openLogDetailModal = (logIndex) => {
-            const log = allLogsData[logIndex];
+        window.openLogDetailModal = (filteredIndex) => {
+            const log = filteredLogsData[filteredIndex];
             if (!log) return;
 
             document.getElementById('detailUserName').innerText = log.userName;
@@ -685,12 +834,13 @@
         };
 
         window.exportLogsToExcel = () => {
-            if (allLogsData.length === 0) {
+            const dataToExport = filteredLogsData.length > 0 ? filteredLogsData : allLogsData;
+            if (dataToExport.length === 0) {
                 alert("ยังไม่มีข้อมูลประวัติให้ดึงออกเป็น Excel");
                 return;
             }
 
-            const excelRows = allLogsData.map((l, idx) => ({
+            const excelRows = dataToExport.map((l, idx) => ({
                 "ลำดับ": idx + 1,
                 "ชื่อผู้เข้าใช้งาน": l.userName,
                 "ห้องปฏิบัติการ": l.room,
@@ -709,7 +859,7 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Lab_Access_Logs");
 
-            const fileName = `Lab_Access_History_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            const fileName = `Lab_Access_Filtered_Logs_${new Date().toISOString().slice(0, 10)}.xlsx`;
             XLSX.writeFile(workbook, fileName);
         };
 
