@@ -26,7 +26,7 @@
         }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.82);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(226, 232, 240, 0.9);
@@ -34,7 +34,7 @@
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(226, 232, 240, 0.9);
@@ -54,7 +54,7 @@
             width: 100vw; height: 100vh;
             pointer-events: none;
             z-index: 0;
-            opacity: 0.4;
+            opacity: 0.35;
         }
 
         .apple-transition-btn { transition: all 180ms ease; }
@@ -228,7 +228,6 @@
                                 <th class="py-3 px-4">เวลาเข้า</th>
                                 <th class="py-3 px-4">เวลาออก</th>
                                 <th class="py-3 px-4 text-center">สถานะครุภัณฑ์</th>
-                                <th class="py-3 px-4 text-center">รายละเอียด</th>
                             </tr>
                         </thead>
                         <tbody id="logsTableBody" class="divide-y divide-slate-200/60"></tbody>
@@ -329,7 +328,7 @@
         </div>
     </div>
 
-    <!-- 🌟 CHECKOUT MODAL (Modal คืนห้อง และ ตรวจเช็กอุปกรณ์) -->
+    <!-- CHECKOUT MODAL -->
     <div id="checkoutModal" class="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 hidden z-50">
         <div class="glass-panel rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl bg-white/95 overflow-hidden">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center">
@@ -636,22 +635,31 @@
                 container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6">ไม่มีผู้ใช้งานอยู่ในห้องปฏิบัติการขณะนี้</p>`;
                 return;
             }
-            container.innerHTML = activeSessionsData.map(s => `
-                <div class="glass-card p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm">
-                    <div class="space-y-1">
-                        <span class="px-2.5 py-0.5 bg-sky-500/20 text-sky-700 font-bold rounded-md text-[11px] mr-1.5">${s.room}</span>
-                        <strong class="font-bold text-sm block text-slate-800">${s.userName} (${s.userId})</strong>
-                        <p class="text-xs text-emerald-600 font-medium">🎯 ${s.purpose}</p>
-                        <p class="text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>เวลาบันทึกเข้า: ${s.checkInTime}</p>
+            container.innerHTML = activeSessionsData.map(s => {
+                const safeSessionId = s.id || '';
+                const safeUserName = (s.userName || '').replace(/'/g, "\\'");
+                const safeRoom = (s.room || '').replace(/'/g, "\\'");
+                const safePurpose = (s.purpose || '').replace(/'/g, "\\'");
+                const safeCheckInTime = (s.checkInTime || '').replace(/'/g, "\\'");
+                const safeCheckInDate = (s.checkInDate || '').replace(/'/g, "\\'");
+
+                return `
+                    <div class="glass-card p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm">
+                        <div class="space-y-1">
+                            <span class="px-2.5 py-0.5 bg-sky-500/20 text-sky-700 font-bold rounded-md text-[11px] mr-1.5">${s.room}</span>
+                            <strong class="font-bold text-sm block text-slate-800">${s.userName} (${s.userId})</strong>
+                            <p class="text-xs text-emerald-600 font-medium">🎯 ${s.purpose}</p>
+                            <p class="text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>เวลาบันทึกเข้า: ${s.checkInTime}</p>
+                        </div>
+                        <button onclick="openCheckoutModal('${safeSessionId}', '${safeUserName}', '${safeRoom}', '${safePurpose}', '${safeCheckInTime}', '${safeCheckInDate}')" class="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 font-bold rounded-xl text-xs active:scale-95 transition">
+                            คืนห้อง
+                        </button>
                     </div>
-                    <button onclick="openCheckoutModal('${s.id}', '${s.userName}', '${s.room}', '${s.purpose}', '${s.checkInTime}', '${s.checkInDate || ''}')" class="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 font-bold rounded-xl text-xs active:scale-95 transition">
-                        คืนห้อง
-                    </button>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        // 🌟 เปิด MODAL คืนห้อง + แสดงรายการครุภัณฑ์เพื่อตรวจเช็ก
+        // 🌟 เปิด MODAL คืนห้อง
         window.openCheckoutModal = (sessionId, userName, roomName, purpose, checkInTime, checkInDate) => {
             activeCheckoutSession = { sessionId, userName, roomName, purpose, checkInTime, checkInDate };
             document.getElementById('modalUserName').innerText = userName;
@@ -706,7 +714,7 @@
             document.getElementById('checkoutModal').classList.add('hidden');
         }
 
-        // 🌟 บันทึกข้อมูลไปยัง 'logs' และลบจาก 'active_sessions'
+        // 🌟 บันทึกข้อมูลไปยัง 'logs' และลบออกจาก 'active_sessions'
         async function confirmCheckout() {
             if(!activeCheckoutSession) return;
             try {
@@ -714,12 +722,12 @@
                 const checkOutTime = now.toLocaleTimeString('th-TH');
                 const remarks = document.getElementById('checkoutRemarks').value.trim();
 
-                // 1. เพิ่มเอกสารบันทึกเข้า logs
+                // 1. เพิ่มเอกสารบันทึกลง collection "logs"
                 await addDoc(collection(db, "logs"), {
-                    userName: activeCheckoutSession.userName,
-                    room: activeCheckoutSession.roomName,
+                    userName: activeCheckoutSession.userName || "-",
+                    room: activeCheckoutSession.roomName || "-",
                     purpose: activeCheckoutSession.purpose || "-",
-                    checkInTime: activeCheckoutSession.checkInTime,
+                    checkInTime: activeCheckoutSession.checkInTime || "-",
                     checkOutTime: checkOutTime,
                     date: activeCheckoutSession.checkInDate || now.toLocaleDateString('th-TH'),
                     roomCheck: {
@@ -728,18 +736,21 @@
                         plug: document.getElementById('chkPlug').checked,
                         clean: document.getElementById('chkClean').checked
                     },
-                    equipmentStates: equipmentStates,
+                    equipmentStates: equipmentStates || {},
                     remarks: remarks || "-",
                     timestamp: serverTimestamp()
                 });
 
-                // 2. ลบออกจาก active_sessions
-                await deleteDoc(doc(db, "active_sessions", activeCheckoutSession.sessionId));
+                // 2. ลบออกจาก collection "active_sessions"
+                if (activeCheckoutSession.sessionId) {
+                    await deleteDoc(doc(db, "active_sessions", activeCheckoutSession.sessionId));
+                }
 
                 closeCheckoutModal();
                 alert("บันทึกส่งคืนห้องและตรวจเช็กความพร้อมเรียบร้อยแล้ว");
                 switchTab('logs');
             } catch (e) {
+                console.error("Checkout Error:", e);
                 alert("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
             }
         }
@@ -747,17 +758,25 @@
         function renderLogs(logs) {
             const container = document.getElementById('logsTableBody');
             if(!logs || logs.length === 0) {
-                container.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-slate-400 text-xs italic">ไม่พบประวัติการเข้าใช้งาน</td></tr>`;
+                container.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 text-xs italic">ไม่พบประวัติการเข้าใช้งาน</td></tr>`;
                 return;
             }
-            container.innerHTML = logs.map(l => {
+
+            // เรียงลำดับจากล่าสุดไปเก่าสุด
+            const sortedLogs = [...logs].sort((a, b) => {
+                const timeA = a.timestamp?.seconds || 0;
+                const timeB = b.timestamp?.seconds || 0;
+                return timeB - timeA;
+            });
+
+            container.innerHTML = sortedLogs.map(l => {
                 const hasIssue = Object.values(l.equipmentStates || {}).includes('issue') || (l.remarks && l.remarks !== "-");
                 return `
                     <tr class="hover:bg-slate-100/60 transition">
-                        <td class="py-3 px-4 font-bold text-slate-800">${l.userName}</td>
-                        <td class="py-3 px-4"><span class="px-2 py-0.5 bg-sky-500/10 text-sky-700 rounded text-xs font-semibold">${l.room}</span></td>
+                        <td class="py-3 px-4 font-bold text-slate-800">${l.userName || '-'}</td>
+                        <td class="py-3 px-4"><span class="px-2 py-0.5 bg-sky-500/10 text-sky-700 rounded text-xs font-semibold">${l.room || '-'}</span></td>
                         <td class="py-3 px-4 text-emerald-600 font-medium">${l.purpose || '-'}</td>
-                        <td class="py-3 px-4 text-xs text-slate-600">${l.date}</td>
+                        <td class="py-3 px-4 text-xs text-slate-600">${l.date || '-'}</td>
                         <td class="py-3 px-4 text-emerald-600 font-bold">${l.checkInTime || '-'}</td>
                         <td class="py-3 px-4 text-rose-600 font-bold">${l.checkOutTime || '-'}</td>
                         <td class="py-3 px-4 text-center">
@@ -766,7 +785,6 @@
                                 `<span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-700 rounded-full text-xs font-bold">🟢 สมบูรณ์</span>`
                             }
                         </td>
-                        <td class="py-3 px-4 text-center"><button class="px-2.5 py-1 bg-slate-200/80 text-slate-700 rounded-lg text-xs font-bold">👁️ ดู</button></td>
                     </tr>
                 `;
             }).join('');
