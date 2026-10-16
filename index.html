@@ -16,60 +16,92 @@
     <style>
         body {
             font-family: 'Prompt', 'Inter', sans-serif;
-            background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 60%, #020617 100%);
+            background-color: #020617;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.12) 0px, transparent 50%);
             background-attachment: fixed;
         }
 
-        .apple-transition-fast { transition: all 100ms cubic-bezier(0.4, 0.0, 0.2, 1); }
-        .apple-transition-btn { transition: all 150ms cubic-bezier(0.4, 0.0, 0.2, 1); }
-        .apple-transition-modal { transition: all 250ms cubic-bezier(0.4, 0.0, 0.2, 1); }
+        /* Tech Grid Pattern Background Overlay */
+        .bg-grid-pattern {
+            background-size: 30px 30px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        /* Glowing Orbs Animation */
+        @keyframes orb-float {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-30px) scale(1.08); }
+        }
+        .animate-orb {
+            animation: orb-float 12s ease-in-out infinite;
+        }
+
+        /* Apple Motion Timing & Easing */
+        .apple-transition-fast { transition: all 120ms cubic-bezier(0.4, 0.0, 0.2, 1); }
+        .apple-transition-btn { transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1); }
+        .apple-transition-modal { transition: all 280ms cubic-bezier(0.4, 0.0, 0.2, 1); }
         .apple-transition-page { transition: all 350ms cubic-bezier(0.4, 0.0, 0.2, 1); }
 
+        /* Liquid Glass / Glassmorphism Effects */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
         .glass-card {
             background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .glass-card:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.07);
             border-color: rgba(56, 189, 248, 0.4);
-            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
         }
 
-        .dynamic-island { transition: all 350ms cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(2, 6, 23, 0.5); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.5); }
     </style>
 </head>
-<body class="h-full flex flex-col text-slate-100 antialiased selection:bg-sky-500 selection:text-white">
+<body class="h-full flex flex-col text-slate-100 antialiased selection:bg-sky-500 selection:text-white relative overflow-x-hidden bg-grid-pattern">
+
+    <!-- Glowing Background Ambient Orbs -->
+    <div class="fixed top-[-100px] left-[-100px] w-96 h-96 bg-sky-500/20 rounded-full blur-[120px] pointer-events-none animate-orb"></div>
+    <div class="fixed bottom-[-100px] right-[-100px] w-96 h-96 bg-teal-500/20 rounded-full blur-[120px] pointer-events-none animate-orb" style="animation-delay: -6s;"></div>
 
     <!-- TOP NAV HEADER -->
-    <header class="sticky top-0 z-40 px-4 lg:px-8 py-3 bg-slate-950/60 backdrop-blur-xl border-b border-white/10">
+    <header class="sticky top-0 z-40 px-4 lg:px-8 py-3 bg-slate-950/70 backdrop-blur-2xl border-b border-white/10 shadow-xl">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-teal-400 flex items-center justify-center text-white text-xl shadow-lg shadow-sky-500/30">
+            <div class="flex items-center space-x-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500 via-teal-400 to-emerald-400 flex items-center justify-center text-white text-xl shadow-lg shadow-sky-500/30 ring-1 ring-white/30">
                     <i class="fa-solid fa-flask-vial"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold tracking-tight text-white leading-tight">Smart Lab Access</h1>
-                    <p class="text-[11px] text-slate-400 font-light">Liquid Glass Edition • RMSC-4</p>
+                    <h1 class="text-lg font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-sky-200 leading-tight">Smart Lab Access</h1>
+                    <p class="text-[11px] text-sky-400/80 font-medium">Liquid Glass Edition • RMSC-4</p>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-2">
-                <select id="topRoomSelect" class="bg-white/10 hover:bg-white/15 text-slate-100 text-xs sm:text-sm font-medium px-3.5 py-2 pr-8 rounded-2xl border border-white/15 focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer apple-transition-fast backdrop-blur-md">
+            <div class="flex items-center space-x-2.5">
+                <select id="topRoomSelect" class="bg-white/10 hover:bg-white/15 text-slate-100 text-xs sm:text-sm font-medium px-4 py-2 pr-8 rounded-2xl border border-white/15 focus:outline-none focus:ring-2 focus:ring-sky-400 cursor-pointer apple-transition-fast backdrop-blur-md shadow-inner">
                     <!-- Dynamic Top Rooms List -->
                 </select>
-                <button id="navAdminBtn" class="bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-400 hover:to-teal-400 active:scale-95 text-white text-xs sm:text-sm font-medium px-4 py-2 rounded-2xl apple-transition-btn flex items-center space-x-1.5 shadow-lg shadow-sky-500/20">
+                <button id="navAdminBtn" class="bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-400 hover:to-teal-400 active:scale-95 text-white text-xs sm:text-sm font-medium px-4 py-2 rounded-2xl apple-transition-btn flex items-center space-x-2 shadow-lg shadow-sky-500/25 border border-white/20">
                     <i class="fa-solid fa-sliders"></i>
                     <span>จัดการระบบ</span>
                 </button>
@@ -83,7 +115,7 @@
     </div>
 
     <!-- MAIN CONTAINER -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 relative z-10">
 
         <!-- BENTO BOX DASHBOARD BANNER -->
         <div class="glass-panel rounded-3xl p-6 relative overflow-hidden space-y-5">
@@ -95,7 +127,7 @@
                     <p class="text-xs text-slate-400 mt-0.5">Bento Box Layout • คลิกการ์ดห้องเพื่อสลับใช้งานทันที</p>
                 </div>
 
-                <div id="dynamicIslandBadge" class="dynamic-island bg-black/60 border border-white/20 px-4 py-1.5 rounded-full flex items-center space-x-2 shadow-2xl backdrop-blur-2xl self-start sm:self-auto">
+                <div id="dynamicIslandBadge" class="bg-black/60 border border-white/20 px-4 py-1.5 rounded-full flex items-center space-x-2 shadow-2xl backdrop-blur-2xl self-start sm:self-auto">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span id="dashboardSummaryCount" class="text-xs font-semibold text-slate-200">กำลังโหลดข้อมูล...</span>
                 </div>
@@ -105,8 +137,8 @@
         </div>
 
         <!-- MAIN NAVIGATION TABS -->
-        <div class="glass-panel p-1.5 rounded-2xl flex flex-wrap sm:flex-nowrap gap-1">
-            <button id="tab-btn-checkin" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold apple-transition-page flex items-center justify-center space-x-2 bg-sky-500/20 text-sky-300 border border-sky-400/30 shadow-md">
+        <div class="glass-panel p-1.5 rounded-2xl flex flex-wrap sm:flex-nowrap gap-1.5">
+            <button id="tab-btn-checkin" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold apple-transition-page flex items-center justify-center space-x-2 bg-sky-500/20 text-sky-300 border border-sky-400/40 shadow-lg shadow-sky-500/10">
                 <i class="fa-solid fa-grip text-sky-400"></i>
                 <span>เลือกชื่อสแกนเข้าใช้งาน</span>
             </button>
@@ -126,18 +158,18 @@
 
         <!-- TAB CONTENT 1: CHECK-IN -->
         <div id="tab-checkin" class="space-y-5">
-            <div class="glass-card rounded-2xl p-4 flex items-center justify-between text-sky-200 text-xs sm:text-sm border-sky-500/20">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg border border-sky-500/30">
+            <div class="glass-card rounded-2xl p-4 flex items-center justify-between text-sky-200 text-xs sm:text-sm border-sky-500/30 bg-sky-950/20">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-lg border border-sky-500/30 shadow-inner">
                         <i class="fa-solid fa-door-open"></i>
                     </div>
                     <div>
                         <p class="text-[11px] text-sky-400 font-medium uppercase tracking-wider">ห้องปฏิบัติการที่เลือกสแกนเข้า:</p>
-                        <strong id="infoRoomName" class="text-sm sm:text-base font-bold text-white">-</strong>
+                        <strong id="infoRoomName" class="text-sm sm:text-base font-bold text-white leading-tight">-</strong>
                     </div>
                 </div>
-                <span class="text-[11px] bg-white/10 px-3 py-1 rounded-full border border-white/10 text-slate-300 font-medium">
-                    <i class="fa-solid fa-circle-info mr-1"></i>สลับห้องได้จาก Bento Dashboard
+                <span class="text-[11px] bg-white/10 px-3.5 py-1.5 rounded-full border border-white/15 text-slate-300 font-medium hidden sm:inline-flex items-center">
+                    <i class="fa-solid fa-circle-info mr-1.5 text-sky-400"></i>สลับห้องได้จาก Bento Dashboard
                 </span>
             </div>
 
@@ -149,7 +181,7 @@
                         </h3>
                         <p class="text-xs text-slate-400 mt-0.5">ระบุวัตถุประสงค์และชื่อเทสต์การทดสอบ เพื่อการสืบค้นย้อนหลังตาม ISO 15189</p>
                     </div>
-                    <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full text-xs font-bold flex items-center">
+                    <span class="px-3.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full text-xs font-bold flex items-center shadow-sm">
                         <i class="fa-solid fa-vial-circle-check text-emerald-400 mr-1.5"></i>วัตถุประสงค์ & Test
                     </span>
                 </div>
@@ -212,9 +244,9 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto rounded-2xl border border-white/10">
                     <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-white/5 text-slate-300 uppercase font-bold text-[11px] tracking-wider border-b border-white/10">
+                        <thead class="bg-slate-900/90 text-slate-300 uppercase font-bold text-[11px] tracking-wider border-b border-white/10">
                             <tr>
                                 <th class="py-3.5 px-4">ผู้เข้าใช้งาน</th>
                                 <th class="py-3.5 px-4">ห้องปฏิบัติการ</th>
@@ -226,7 +258,7 @@
                                 <th class="py-3.5 px-4 text-center">รายละเอียด</th>
                             </tr>
                         </thead>
-                        <tbody id="logsTableBody" class="divide-y divide-white/5"></tbody>
+                        <tbody id="logsTableBody" class="divide-y divide-white/5 bg-slate-950/40"></tbody>
                     </table>
                 </div>
             </div>
@@ -234,8 +266,8 @@
 
         <!-- TAB CONTENT 4: ADMIN -->
         <div id="tab-admin" class="hidden space-y-6">
-            <div id="adminAuthBox" class="glass-panel p-8 rounded-3xl max-w-md mx-auto text-center space-y-4">
-                <div class="w-14 h-14 bg-sky-500/20 border border-sky-500/30 text-sky-400 rounded-2xl flex items-center justify-center mx-auto text-2xl">
+            <div id="adminAuthBox" class="glass-panel p-8 rounded-3xl max-w-md mx-auto text-center space-y-4 shadow-2xl">
+                <div class="w-14 h-14 bg-sky-500/20 border border-sky-500/30 text-sky-400 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-inner">
                     <i class="fa-solid fa-lock"></i>
                 </div>
                 <div>
@@ -243,7 +275,7 @@
                     <p class="text-xs text-slate-400 mt-1">กรอกรหัสผ่านเพื่อสิทธิ์การเพิ่มห้อง บุคลากร และครุภัณฑ์</p>
                 </div>
                 <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่าน (Rmsc4_admin)" class="w-full px-4 py-2.5 rounded-2xl bg-black/40 border border-white/15 text-center text-sm text-white focus:ring-2 focus:ring-sky-400 outline-none">
-                <button id="verifyAdminBtn" class="w-full py-2.5 bg-gradient-to-r from-sky-500 to-teal-500 text-white font-medium rounded-2xl text-sm active:scale-95 apple-transition-btn shadow-lg shadow-sky-500/20">
+                <button id="verifyAdminBtn" class="w-full py-2.5 bg-gradient-to-r from-sky-500 to-teal-500 text-white font-medium rounded-2xl text-sm active:scale-95 apple-transition-btn shadow-lg shadow-sky-500/20 border border-white/10">
                     เข้าสู่ระบบจัดการ
                 </button>
             </div>
@@ -303,7 +335,7 @@
     </main>
 
     <!-- CHECK-IN PURPOSE & TEST NAME MODAL -->
-    <div id="checkInModal" class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 hidden z-50 apple-transition-modal">
+    <div id="checkInModal" class="fixed inset-0 bg-black/75 backdrop-blur-xl flex items-center justify-center p-4 hidden z-50 apple-transition-modal">
         <div class="glass-panel rounded-3xl max-w-lg w-full flex flex-col shadow-2xl overflow-hidden border border-white/20">
             <div class="p-5 bg-white/10 border-b border-white/10 flex justify-between items-center">
                 <h3 class="font-bold text-base text-white flex items-center">
@@ -312,7 +344,7 @@
                 <button id="closeCheckInModalBtn" class="text-slate-400 hover:text-white apple-transition-fast"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-6 space-y-4 text-xs sm:text-sm">
-                <div class="glass-card p-4 rounded-2xl space-y-1">
+                <div class="glass-card p-4 rounded-2xl space-y-1 bg-sky-950/30 border-sky-500/20">
                     <p><strong class="text-slate-400">ผู้ขอเข้าใช้งาน:</strong> <span id="checkInModalUserName" class="font-bold text-white">-</span></p>
                     <p><strong class="text-slate-400">ห้องปฏิบัติการ:</strong> <span id="checkInModalRoomName" class="font-bold text-sky-400">-</span></p>
                 </div>
@@ -346,16 +378,26 @@
                     <input type="text" id="checkInPurposeInput" placeholder="เลือกจากด้านบน หรือพิมพ์ระบุวัตถุประสงค์หลัก..." class="w-full px-4 py-2.5 rounded-2xl bg-black/40 border border-white/15 text-white text-xs sm:text-sm focus:ring-2 focus:ring-sky-400 outline-none">
                 </div>
 
+                <!-- 🌟 เพิ่ม Quick Test Tags -->
                 <div>
-                    <label class="block font-bold text-emerald-300 mb-1.5 flex items-center">
-                        <i class="fa-solid fa-pen-to-square mr-1.5"></i>3. ระบุชื่อการทดสอบ / ชื่อเทสต์ (Test / Assay Name):
+                    <label class="block font-bold text-emerald-300 mb-1.5 flex items-center justify-between">
+                        <span><i class="fa-solid fa-pen-to-square mr-1.5"></i>3. ระบุชื่อการทดสอบ / ชื่อเทสต์:</span>
+                        <span class="text-[10px] text-slate-400 font-normal">คลิก Tag ด่วนด้านล่างได้</span>
                     </label>
-                    <input type="text" id="checkInTestNameInput" placeholder="ระบุชื่อเทสต์ (เช่น HPV Real-time PCR, HLA-B*5801, COVID-19)..." class="w-full px-4 py-2.5 rounded-2xl bg-black/40 border border-emerald-500/30 text-emerald-200 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
+                    
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium transition" data-test="HPV Real-time PCR">HPV Real-time PCR</button>
+                        <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium transition" data-test="HLA-B*5801">HLA-B*5801</button>
+                        <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium transition" data-test="Dengue PCR">Dengue PCR</button>
+                        <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium transition" data-test="Respiratory Panel">Respiratory Panel</button>
+                    </div>
+
+                    <input type="text" id="checkInTestNameInput" placeholder="ระบุชื่อเทสต์ (เช่น HPV Real-time PCR, HLA-B*5801)..." class="w-full px-4 py-2.5 rounded-2xl bg-black/40 border border-emerald-500/30 text-emerald-200 text-xs sm:text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
                 </div>
             </div>
             <div class="p-4 bg-white/5 border-t border-white/10 flex justify-end space-x-2.5">
                 <button id="cancelCheckInModalBtn" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 rounded-2xl font-medium text-xs sm:text-sm apple-transition-fast">ยกเลิก</button>
-                <button id="confirmCheckInModalBtn" class="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-teal-500 text-white rounded-2xl font-medium text-xs sm:text-sm shadow-lg shadow-sky-500/20 active:scale-95 apple-transition-btn">
+                <button id="confirmCheckInModalBtn" class="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-teal-500 text-white rounded-2xl font-medium text-xs sm:text-sm shadow-lg shadow-sky-500/20 active:scale-95 apple-transition-btn border border-white/10">
                     ยืนยันการเข้าใช้งาน (Check-In)
                 </button>
             </div>
@@ -363,7 +405,7 @@
     </div>
 
     <!-- CHECKOUT MODAL -->
-    <div id="checkoutModal" class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 hidden z-50 apple-transition-modal">
+    <div id="checkoutModal" class="fixed inset-0 bg-black/75 backdrop-blur-xl flex items-center justify-center p-4 hidden z-50 apple-transition-modal">
         <div class="glass-panel rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-white/20">
             <div class="p-5 bg-white/10 border-b border-white/10 flex justify-between items-center">
                 <h3 class="font-bold text-base text-white flex items-center">
@@ -372,7 +414,7 @@
                 <button id="closeCheckoutModalBtn" class="text-slate-400 hover:text-white apple-transition-fast"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs sm:text-sm">
-                <div class="glass-card p-4 rounded-2xl space-y-1">
+                <div class="glass-card p-4 rounded-2xl space-y-1 bg-emerald-950/20 border-emerald-500/20">
                     <p><strong class="text-slate-400">ผู้ใช้งาน:</strong> <span id="modalUserName" class="font-bold text-white">-</span></p>
                     <p><strong class="text-slate-400">ห้องปฏิบัติการ:</strong> <span id="modalRoomName" class="font-bold text-sky-400">-</span></p>
                     <p><strong class="text-slate-400">วัตถุประสงค์ & เทสต์:</strong> <span id="modalPurpose" class="font-semibold text-emerald-400">-</span></p>
@@ -423,7 +465,7 @@
     </div>
 
     <!-- LOG DETAIL MODAL -->
-    <div id="logDetailModal" class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 hidden z-50 apple-transition-modal">
+    <div id="logDetailModal" class="fixed inset-0 bg-black/75 backdrop-blur-xl flex items-center justify-center p-4 hidden z-50 apple-transition-modal">
         <div class="glass-panel rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-white/20">
             <div class="p-5 bg-white/10 border-b border-white/10 flex justify-between items-center">
                 <h3 class="font-bold text-base text-white flex items-center">
@@ -511,29 +553,24 @@
         let filteredLogsData = [];
         let allEquipment = [];
 
-        // Tab Switching Logic
         function switchTab(tab) {
             ['checkin', 'active', 'logs', 'admin'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
                 document.getElementById(`tab-btn-${t}`).className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold apple-transition-page flex items-center justify-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-white/5";
             });
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-btn-${tab}`).className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold apple-transition-page flex items-center justify-center space-x-2 bg-sky-500/20 text-sky-300 border border-sky-400/30 shadow-md";
+            document.getElementById(`tab-btn-${tab}`).className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold apple-transition-page flex items-center justify-center space-x-2 bg-sky-500/20 text-sky-300 border border-sky-400/40 shadow-lg shadow-sky-500/10";
         }
 
-        // Initialize App & Firebase Listeners
         window.addEventListener('DOMContentLoaded', () => {
-            // Tab Event Listeners
             document.getElementById('tab-btn-checkin').addEventListener('click', () => switchTab('checkin'));
             document.getElementById('tab-btn-active').addEventListener('click', () => switchTab('active'));
             document.getElementById('tab-btn-logs').addEventListener('click', () => switchTab('logs'));
             document.getElementById('tab-btn-admin').addEventListener('click', () => switchTab('admin'));
             document.getElementById('navAdminBtn').addEventListener('click', () => switchTab('admin'));
 
-            // Top Room Select Event
             document.getElementById('topRoomSelect').addEventListener('change', (e) => changeRoom(e.target.value));
 
-            // Modal Controls Events
             document.getElementById('closeCheckInModalBtn').addEventListener('click', closeCheckInModal);
             document.getElementById('cancelCheckInModalBtn').addEventListener('click', closeCheckInModal);
             document.getElementById('confirmCheckInModalBtn').addEventListener('click', confirmCheckInWithPurpose);
@@ -545,22 +582,24 @@
             document.getElementById('closeLogDetailModalBtn').addEventListener('click', closeLogDetailModal);
             document.getElementById('closeLogDetailModalBtn2').addEventListener('click', closeLogDetailModal);
 
-            // Filter Controls Events
             document.getElementById('filterRoom').addEventListener('change', applyLogsFilter);
             document.getElementById('filterUser').addEventListener('change', applyLogsFilter);
             document.getElementById('filterStatus').addEventListener('change', applyLogsFilter);
             document.getElementById('sortOrder').addEventListener('change', applyLogsFilter);
             document.getElementById('exportExcelBtn').addEventListener('click', exportLogsToExcel);
 
-            // Quick Purpose Buttons
             document.querySelectorAll('.quick-purpose-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const val = btn.getAttribute('data-quick-purpose');
-                    document.getElementById('checkInPurposeInput').value = val;
+                    document.getElementById('checkInPurposeInput').value = btn.getAttribute('data-quick-purpose');
                 });
             });
 
-            // Admin Actions Events
+            document.querySelectorAll('.quick-test-tag').forEach(tag => {
+                tag.addEventListener('click', () => {
+                    document.getElementById('checkInTestNameInput').value = tag.getAttribute('data-test');
+                });
+            });
+
             document.getElementById('verifyAdminBtn').addEventListener('click', verifyAdminPassword);
             document.getElementById('logoutAdminBtn').addEventListener('click', logoutAdmin);
             document.getElementById('addNewRoomBtn').addEventListener('click', addNewRoom);
@@ -686,7 +725,7 @@
                 const shortName = rName.split(' ')[0];
 
                 return `
-                    <div data-roomname="${rName}" class="room-card-btn glass-card p-3.5 rounded-2xl cursor-pointer apple-transition-btn text-left flex flex-col justify-between ${isSelected ? 'ring-2 ring-sky-400 bg-white/10' : ''}">
+                    <div data-roomname="${rName}" class="room-card-btn glass-card p-3.5 rounded-2xl cursor-pointer apple-transition-btn text-left flex flex-col justify-between ${isSelected ? 'ring-2 ring-sky-400 bg-sky-500/10' : ''}">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 block truncate uppercase tracking-wider">${shortName}</span>
                             <strong class="text-xs text-white block truncate font-medium mt-0.5">${rName.split('(')[1]?.replace(')', '') || rName}</strong>
@@ -794,7 +833,7 @@
                 return;
             }
             container.innerHTML = activeSessionsData.map(s => `
-                <div class="glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="glass-card p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-amber-500/20">
                     <div class="space-y-1">
                         <div class="flex flex-wrap items-center gap-1.5">
                             <span class="px-2.5 py-0.5 bg-sky-500/20 text-sky-300 border border-sky-500/30 rounded-md text-[11px] font-bold">${s.room}</span>
