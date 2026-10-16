@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts (Prompt & Inter) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- SheetJS (สำหรับส่งออก Excel) -->
+    <!-- SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
@@ -178,16 +178,15 @@
         </div>
 
         <!-- TAB CONTENT 3: HISTORY LOGS -->
-        <div id="tab-logs" class="hidden space-y-4 relative pb-10">
+        <div id="tab-logs" class="hidden space-y-4">
             <div class="glass-panel rounded-3xl p-5 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <h3 class="font-bold text-sm sm:text-base flex items-center text-slate-800"><i class="fa-solid fa-rectangle-list text-sky-500 mr-2.5"></i>ประวัติการเข้าใช้งาน & ตรวจเช็กห้อง</h3>
                         <p class="text-xs text-slate-500">ตรวจสอบรายละเอียดเวลาเข้า-ออก วัตถุประสงค์ และการรายงานครุภัณฑ์</p>
                     </div>
-                    <!-- ปุ่มดาวน์โหลด Excel -->
-                    <button id="exportExcelBtn" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center justify-center space-x-2 self-start sm:self-auto">
-                        <i class="fa-solid fa-file-excel text-base"></i>
+                    <button id="exportExcelBtn" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold shadow-md active:scale-95 transition flex items-center justify-center space-x-1.5 self-start sm:self-auto">
+                        <i class="fa-solid fa-file-excel text-sm"></i>
                         <span>ส่งออกไฟล์ Excel (.xlsx)</span>
                     </button>
                 </div>
@@ -209,14 +208,6 @@
                         <tbody id="logsTableBody" class="divide-y divide-slate-200/60"></tbody>
                     </table>
                 </div>
-            </div>
-
-            <!-- 🔴 ปุ่มลบ/รีเซ็ตข้อมูลขนาดเล็กมุมขวาล่าง -->
-            <div class="flex justify-end pt-2">
-                <button id="resetLogsBtn" class="text-[10px] bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white px-2.5 py-1 rounded-lg font-bold transition flex items-center space-x-1 border border-rose-500/20 shadow-sm">
-                    <i class="fa-solid fa-trash-can"></i>
-                    <span>รีเซ็ตประวัติทั้งหมด</span>
-                </button>
             </div>
         </div>
 
@@ -372,7 +363,7 @@
         </div>
     </div>
 
-    <!-- LOG DETAILS MODAL -->
+    <!-- 🌟 LOG DETAILS MODAL (ดูประวัติอย่างละเอียด) -->
     <div id="logDetailsModal" class="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 hidden z-50">
         <div class="glass-panel rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl bg-white/95 overflow-hidden">
             <div class="p-5 border-b border-slate-200 flex justify-between items-center">
@@ -382,6 +373,7 @@
                 <button id="closeLogDetailsModalBtn" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs sm:text-sm">
+                <!-- User & Session Info -->
                 <div class="p-4 rounded-2xl bg-sky-50 border border-sky-100 space-y-1.5">
                     <div class="flex justify-between items-center">
                         <strong id="detailUserName" class="text-sm text-slate-800 font-bold">-</strong>
@@ -391,6 +383,7 @@
                     <p class="text-slate-600"><i class="fa-solid fa-vial mr-1 text-emerald-500"></i><strong>วัตถุประสงค์:</strong> <span id="detailPurpose">-</span></p>
                 </div>
 
+                <!-- Time & Duration Summary Box -->
                 <div class="grid grid-cols-3 gap-2 text-center p-3.5 rounded-2xl bg-slate-100/80 border border-slate-200">
                     <div>
                         <span class="text-[10px] text-slate-400 block uppercase font-bold">เวลาเข้า</span>
@@ -406,16 +399,19 @@
                     </div>
                 </div>
 
+                <!-- Checklist Verification -->
                 <div class="space-y-2">
                     <h4 class="font-bold text-slate-800 flex items-center"><i class="fa-solid fa-list-check text-sky-500 mr-2"></i>การตรวจความเรียบร้อยก่อนคืนห้อง</h4>
                     <div id="detailChecklist" class="grid grid-cols-2 gap-2 text-xs"></div>
                 </div>
 
+                <!-- Equipment Status -->
                 <div class="space-y-2">
                     <h4 class="font-bold text-slate-800 flex items-center"><i class="fa-solid fa-microscope text-teal-500 mr-2"></i>สภาพครุภัณฑ์ในห้อง</h4>
                     <div id="detailEquipment" class="space-y-1.5"></div>
                 </div>
 
+                <!-- Remarks -->
                 <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1">
                     <strong class="font-bold block flex items-center"><i class="fa-solid fa-comment-dots mr-1.5"></i>หมายเหตุ / ข้อสังเกตเพิ่มเติม:</strong>
                     <p id="detailRemarks" class="text-slate-700 italic">-</p>
@@ -430,7 +426,7 @@
     <!-- SCRIPT MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCISN7dBIIGqwfjYQFm_i1n1cC5fn-3L94",
@@ -542,12 +538,6 @@
             document.getElementById('closeLogDetailsModalBtn').addEventListener('click', () => document.getElementById('logDetailsModal').classList.add('hidden'));
             document.getElementById('closeLogDetailsModalBtn2').addEventListener('click', () => document.getElementById('logDetailsModal').classList.add('hidden'));
 
-            // Export Excel Event
-            document.getElementById('exportExcelBtn').addEventListener('click', exportLogsToExcel);
-
-            // 🔴 Reset Logs Event
-            document.getElementById('resetLogsBtn').addEventListener('click', handleResetLogs);
-
             document.querySelectorAll('.quick-purpose-btn').forEach(btn => {
                 btn.addEventListener('click', () => document.getElementById('checkInPurposeInput').value = btn.getAttribute('data-quick-purpose'));
             });
@@ -572,7 +562,7 @@
 
             onSnapshot(collection(db, "logs"), (snapshot) => {
                 allLogsData = [];
-                snapshot.forEach(doc => allLogsData.push({ docId: doc.id, ...doc.data() }));
+                snapshot.forEach(doc => allLogsData.push(doc.data()));
                 renderLogs(allLogsData);
             });
 
@@ -800,6 +790,7 @@
             }
         }
 
+        // 🌟 ฟังก์ชันคำนวณระยะเวลาใช้งาน
         function calculateDuration(timeIn, timeOut) {
             try {
                 const parseTime = (tStr) => {
@@ -831,6 +822,7 @@
             }
         }
 
+        // 🌟 แสดงตารางประวัติใช้งาน + ปุ่มดูรายละเอียด
         function renderLogs(logs) {
             const container = document.getElementById('logsTableBody');
             if(!logs || logs.length === 0) {
@@ -872,6 +864,7 @@
             window.currentSortedLogs = sortedLogs;
         }
 
+        // 🌟 เปิด Modal แสดงรายละเอียดประวัติแบบเจาะลึก
         window.viewLogDetail = (index) => {
             const log = window.currentSortedLogs[index];
             if(!log) return;
@@ -885,6 +878,7 @@
             document.getElementById('detailDuration').innerText = calculateDuration(log.checkInTime, log.checkOutTime);
             document.getElementById('detailRemarks').innerText = log.remarks && log.remarks !== "-" ? log.remarks : "ไม่มีข้อสังเกตเพิ่มเติม";
 
+            // Render Checklist
             const chk = log.roomCheck || {};
             document.getElementById('detailChecklist').innerHTML = `
                 <div class="p-2 rounded-xl bg-slate-100/70 flex items-center justify-between"><span>ปิดแอร์:</span> <strong>${chk.air ? '🟢 เรียบร้อย' : '🔴 ไม่ได้ปิด'}</strong></div>
@@ -893,6 +887,7 @@
                 <div class="p-2 rounded-xl bg-slate-100/70 flex items-center justify-between"><span>ทำความสะอาด:</span> <strong>${chk.clean ? '🟢 เรียบร้อย' : '🔴 ไม่ได้เก็บ'}</strong></div>
             `;
 
+            // Render Equipment Condition
             const equipStates = log.equipmentStates || {};
             const roomEquip = allEquipment.filter(e => e.room === log.room);
             const equipContainer = document.getElementById('detailEquipment');
@@ -916,78 +911,6 @@
 
             document.getElementById('logDetailsModal').classList.remove('hidden');
         };
-
-        // 📊 ฟังก์ชันส่งออกเป็น EXCEL (.xlsx)
-        function exportLogsToExcel() {
-            if(!allLogsData || allLogsData.length === 0) {
-                alert("ไม่มีข้อมูลประวัติสำหรับส่งออก");
-                return;
-            }
-
-            const exportData = allLogsData.map((l, idx) => {
-                const chk = l.roomCheck || {};
-                const hasIssue = Object.values(l.equipmentStates || {}).includes('issue') || (l.remarks && l.remarks !== "-");
-                return {
-                    "ลำดับ": idx + 1,
-                    "ชื่อ-นามสกุล": l.userName || "-",
-                    "ห้องปฏิบัติการ": l.room || "-",
-                    "วัตถุประสงค์ / Test": l.purpose || "-",
-                    "วันที่": l.date || "-",
-                    "เวลาเข้า": l.checkInTime || "-",
-                    "เวลาออก": l.checkOutTime || "-",
-                    "ระยะเวลาใช้งาน": calculateDuration(l.checkInTime, l.checkOutTime),
-                    "สถานะครุภัณฑ์": hasIssue ? "🔴 มีข้อสังเกต/ชำรุด" : "🟢 สมบูรณ์ปกติ",
-                    "ปิดแอร์": chk.air ? "เรียบร้อย" : "ไม่ได้ปิด",
-                    "ปิดไฟ": chk.light ? "เรียบร้อย" : "ไม่ได้ปิด",
-                    "ถอดปลั๊ก": chk.plug ? "เรียบร้อย" : "ไม่ได้ถอด",
-                    "เก็บขยะ": chk.clean ? "เรียบร้อย" : "ไม่ได้เก็บ",
-                    "หมายเหตุเพิ่มเติม": l.remarks || "-"
-                };
-            });
-
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Access Logs");
-
-            // ปรับขนาดความกว้างคอลัมน์ให้อ่านง่าย
-            worksheet['!cols'] = [
-                { wch: 6 }, { wch: 22 }, { wch: 30 }, { wch: 35 },
-                { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 18 },
-                { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
-                { wch: 10 }, { wch: 30 }
-            ];
-
-            const today = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(workbook, `SmartLab_Access_Logs_${today}.xlsx`);
-        }
-
-        // 🔴 ฟังก์ชันรีเซ็ตและลบประวัติทั้งหมด
-        async function handleResetLogs() {
-            const pwd = prompt("🔒 กรุณากรอกรหัสผ่านผู้ดูแลระบบเพื่อรีเซ็ตข้อมูล:");
-            if (pwd !== "Admin01") {
-                if (pwd !== null) alert("❌ รหัสผ่านไม่ถูกต้อง");
-                return;
-            }
-
-            const confirmText = prompt("⚠️ ยืนยันการลบข้อมูลประวัติการใช้งานทั้งหมด?\nพิมพ์คำว่า 'ลบ' เพื่อยืนยันการลบทันที:");
-            if (confirmText !== "ลบ") {
-                alert("การลบถูกยกเลิก");
-                return;
-            }
-
-            try {
-                const querySnapshot = await getDocs(collection(db, "logs"));
-                const deletePromises = [];
-                querySnapshot.forEach((docSnap) => {
-                    deletePromises.push(deleteDoc(doc(db, "logs", docSnap.id)));
-                });
-                await Promise.all(deletePromises);
-                alert("🗑️ ลบและรีเซ็ตข้อมูลประวัติใช้งานเรียบร้อยแล้ว");
-            } catch (e) {
-                console.error("Error deleting logs:", e);
-                alert("เกิดข้อผิดพลาดในการลบข้อมูล: " + e.message);
-            }
-        }
 
         function verifyAdminPassword() {
             const pass = document.getElementById('adminPasswordInput').value;
