@@ -25,7 +25,6 @@
             background-attachment: fixed;
         }
 
-        /* Glassmorphism Panel */
         .glass-panel {
             background: rgba(255, 255, 255, 0.82);
             backdrop-filter: blur(20px);
@@ -34,7 +33,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
         }
 
-        /* Glassmorphism Card */
         .glass-card {
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(12px);
@@ -50,7 +48,6 @@
             transform: translateY(-1px);
         }
 
-        /* DNA Canvas Backdrop */
         #dnaCanvas {
             position: fixed;
             top: 0; left: 0;
@@ -60,12 +57,10 @@
             opacity: 0.4;
         }
 
-        /* Micro Interactions */
         .apple-transition-btn { transition: all 180ms ease; }
         .apple-transition-btn:hover { transform: translateY(-1px); }
         .apple-transition-btn:active { transform: translateY(0px) scale(0.98); }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 99px; }
@@ -130,7 +125,6 @@
                 </div>
             </div>
 
-            <!-- Bento Grid Responsive Desktop/Mobile -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="roomDashboardGrid"></div>
         </div>
 
@@ -177,7 +171,7 @@
             <div class="glass-panel rounded-3xl p-5 space-y-4">
                 <div>
                     <h3 class="font-bold text-sm sm:text-base flex items-center text-slate-800"><i class="fa-solid fa-users-viewfinder text-amber-500 mr-2.5"></i>ผู้กำลังใช้งานห้องปฏิบัติการขณะนี้</h3>
-                    <p class="text-xs text-slate-500 mt-0.5">แสดงรายการผู้ใช้ที่ยังอยู่ในห้องแล็บ สามารถกดคืนห้องเมื่อเสร็จสิ้นภารกิจ</p>
+                    <p class="text-xs text-slate-500 mt-0.5">แสดงรายการผู้ใช้ที่ยังอยู่ในห้องแล็บ สามารถกดคืนห้องเพื่อประเมินครุภัณฑ์และส่งคืนได้</p>
                 </div>
                 <div id="activeSessionsList" class="space-y-3"></div>
             </div>
@@ -278,6 +272,17 @@
                     </div>
                     <button id="addNewUserBtn" class="w-full bg-emerald-500 text-white py-2.5 rounded-xl font-bold">+ เพิ่มผู้ใช้งาน</button>
                 </div>
+
+                <div class="glass-panel p-5 rounded-3xl space-y-3 text-xs sm:text-sm">
+                    <h4 class="font-bold text-slate-800">เพิ่มครุภัณฑ์และอุปกรณ์ประจำห้อง</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <select id="equipRoomSelect" class="p-2.5 rounded-xl bg-white border border-slate-300 outline-none"></select>
+                        <input type="text" id="newEquipAssetId" placeholder="เลขครุภัณฑ์" class="p-2.5 rounded-xl bg-white border border-slate-300 outline-none">
+                        <input type="text" id="newEquipName" placeholder="ชื่ออุปกรณ์ / เครื่องมือ" class="p-2.5 rounded-xl bg-white border border-slate-300 outline-none">
+                    </div>
+                    <button id="addNewEquipBtn" class="w-full bg-sky-500 text-white py-2.5 rounded-xl font-bold">+ เพิ่มครุภัณฑ์</button>
+                    <div id="adminEquipmentList" class="space-y-1.5 pt-2"></div>
+                </div>
             </div>
         </div>
     </main>
@@ -324,6 +329,66 @@
         </div>
     </div>
 
+    <!-- 🌟 CHECKOUT MODAL (Modal คืนห้อง และ ตรวจเช็กอุปกรณ์) -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 hidden z-50">
+        <div class="glass-panel rounded-3xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl bg-white/95 overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-800 flex items-center">
+                    <i class="fa-solid fa-clipboard-check text-emerald-500 mr-2.5"></i>บันทึกเวลาออกจากห้อง & เช็กความพร้อมครุภัณฑ์
+                </h3>
+                <button id="closeCheckoutModalBtn" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs sm:text-sm">
+                <div class="p-3.5 rounded-2xl bg-emerald-50 text-emerald-900 border border-emerald-200 space-y-1">
+                    <p><strong>ผู้ใช้งาน:</strong> <span id="modalUserName" class="font-bold">-</span></p>
+                    <p><strong>ห้องปฏิบัติการ:</strong> <span id="modalRoomName" class="font-bold text-sky-600">-</span></p>
+                    <p><strong>วัตถุประสงค์ & เทสต์:</strong> <span id="modalPurpose" class="font-semibold text-emerald-700">-</span></p>
+                    <p><strong>เวลาที่เข้าใช้งาน:</strong> <span id="modalCheckInTime" class="font-medium">-</span></p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-2">1. ความเรียบร้อยของห้องปฏิบัติการ</h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center space-x-2 glass-card p-2.5 rounded-xl cursor-pointer">
+                            <input type="checkbox" id="chkAir" checked class="rounded text-sky-500 w-4 h-4">
+                            <span class="text-slate-700">ปิดเครื่องปรับอากาศ</span>
+                        </label>
+                        <label class="flex items-center space-x-2 glass-card p-2.5 rounded-xl cursor-pointer">
+                            <input type="checkbox" id="chkLight" checked class="rounded text-sky-500 w-4 h-4">
+                            <span class="text-slate-700">ปิดไฟแสงสว่าง</span>
+                        </label>
+                        <label class="flex items-center space-x-2 glass-card p-2.5 rounded-xl cursor-pointer">
+                            <input type="checkbox" id="chkPlug" checked class="rounded text-sky-500 w-4 h-4">
+                            <span class="text-slate-700">ถอดปลั๊กที่ไม่จำเป็น</span>
+                        </label>
+                        <label class="flex items-center space-x-2 glass-card p-2.5 rounded-xl cursor-pointer">
+                            <input type="checkbox" id="chkClean" checked class="rounded text-sky-500 w-4 h-4">
+                            <span class="text-slate-700">ทำความสะอาด/เก็บขยะ</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-2">2. ประเมินความพร้อมครุภัณฑ์ประจำห้อง</h4>
+                    <div id="modalEquipmentList" class="space-y-2"></div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-1.5 flex items-center">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2"></i>3. หมายเหตุ / รายงานอุปกรณ์ชำรุดเพิ่มเติม
+                    </h4>
+                    <textarea id="checkoutRemarks" rows="2" placeholder="ระบุข้อบกพร่อง หรือความเสียหายของอุปกรณ์ (ถ้ามี)..." class="w-full p-3 rounded-2xl bg-white border border-slate-300 text-xs sm:text-sm outline-none resize-none"></textarea>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end space-x-2.5">
+                <button id="cancelCheckoutModalBtn" class="px-4 py-2.5 bg-slate-200 text-slate-700 rounded-2xl font-bold text-xs">ยกเลิก</button>
+                <button id="confirmCheckoutModalBtn" class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-xs shadow-md active:scale-95 transition">
+                    บันทึกส่งคืนห้อง (Check-Out)
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -342,7 +407,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 🧬 DNA Animation Canvas (Subtle Background)
+        // 🧬 DNA Animation Canvas
         const canvas = document.getElementById('dnaCanvas');
         const ctx = canvas.getContext('2d');
         let width = canvas.width = window.innerWidth;
@@ -357,7 +422,7 @@
         function drawDNA() {
             ctx.clearRect(0, 0, width, height);
             const numNodes = 32;
-            const xCenter = width > 768 ? width * 0.88 : width * 0.85; // ปรับตำแหน่งตามขนาดหน้าจอ
+            const xCenter = width > 768 ? width * 0.88 : width * 0.85;
             
             for(let i = 0; i < numNodes; i++) {
                 const y = (height / numNodes) * i;
@@ -408,8 +473,11 @@
         ];
 
         let pendingCheckInUser = null;
+        let activeCheckoutSession = null;
+        let equipmentStates = {};
         let activeSessionsData = [];
         let allLogsData = [];
+        let allEquipment = [];
 
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('tab-btn-checkin').addEventListener('click', () => switchTab('checkin'));
@@ -427,6 +495,11 @@
             document.getElementById('cancelCheckInModalBtn').addEventListener('click', () => document.getElementById('checkInModal').classList.add('hidden'));
             document.getElementById('confirmCheckInModalBtn').addEventListener('click', confirmCheckIn);
 
+            // Checkout Modal Events
+            document.getElementById('closeCheckoutModalBtn').addEventListener('click', closeCheckoutModal);
+            document.getElementById('cancelCheckoutModalBtn').addEventListener('click', closeCheckoutModal);
+            document.getElementById('confirmCheckoutModalBtn').addEventListener('click', confirmCheckout);
+
             document.querySelectorAll('.quick-purpose-btn').forEach(btn => {
                 btn.addEventListener('click', () => document.getElementById('checkInPurposeInput').value = btn.getAttribute('data-quick-purpose'));
             });
@@ -434,6 +507,12 @@
             document.querySelectorAll('.quick-test-tag').forEach(tag => {
                 tag.addEventListener('click', () => document.getElementById('checkInTestNameInput').value = tag.getAttribute('data-test'));
             });
+
+            document.getElementById('verifyAdminBtn').addEventListener('click', verifyAdminPassword);
+            document.getElementById('logoutAdminBtn').addEventListener('click', logoutAdmin);
+            document.getElementById('addNewRoomBtn').addEventListener('click', addNewRoom);
+            document.getElementById('addNewUserBtn').addEventListener('click', addNewUser);
+            document.getElementById('addNewEquipBtn').addEventListener('click', addNewEquipment);
 
             // Firebase Realtime Listeners
             onSnapshot(collection(db, "active_sessions"), (snapshot) => {
@@ -447,6 +526,12 @@
                 allLogsData = [];
                 snapshot.forEach(doc => allLogsData.push(doc.data()));
                 renderLogs(allLogsData);
+            });
+
+            onSnapshot(collection(db, "equipment"), (snapshot) => {
+                allEquipment = [];
+                snapshot.forEach(doc => allEquipment.push({ docId: doc.id, ...doc.data() }));
+                renderAdminEquipment();
             });
 
             renderUsers(defaultUsers);
@@ -466,6 +551,9 @@
             const select = document.getElementById('topRoomSelect');
             select.innerHTML = roomsList.map(r => `<option value="${r}">${r}</option>`).join('');
             select.value = currentRoom;
+
+            const equipSelect = document.getElementById('equipRoomSelect');
+            if(equipSelect) equipSelect.innerHTML = roomsList.map(r => `<option value="${r}">${r}</option>`).join('');
         }
 
         function renderRoomDashboard() {
@@ -554,17 +642,107 @@
                         <span class="px-2.5 py-0.5 bg-sky-500/20 text-sky-700 font-bold rounded-md text-[11px] mr-1.5">${s.room}</span>
                         <strong class="font-bold text-sm block text-slate-800">${s.userName} (${s.userId})</strong>
                         <p class="text-xs text-emerald-600 font-medium">🎯 ${s.purpose}</p>
+                        <p class="text-[11px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i>เวลาบันทึกเข้า: ${s.checkInTime}</p>
                     </div>
-                    <button onclick="deleteSession('${s.id}')" class="px-4 py-2 bg-amber-500/20 text-amber-700 font-bold rounded-xl text-xs active:scale-95 transition">คืนห้อง</button>
+                    <button onclick="openCheckoutModal('${s.id}', '${s.userName}', '${s.room}', '${s.purpose}', '${s.checkInTime}', '${s.checkInDate || ''}')" class="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-700 font-bold rounded-xl text-xs active:scale-95 transition">
+                        คืนห้อง
+                    </button>
                 </div>
             `).join('');
         }
 
-        window.deleteSession = async (docId) => {
-            if(confirm("ยืนยันการบันทึกส่งคืนห้องปฏิบัติการ?")) {
-                await deleteDoc(doc(db, "active_sessions", docId));
+        // 🌟 เปิด MODAL คืนห้อง + แสดงรายการครุภัณฑ์เพื่อตรวจเช็ก
+        window.openCheckoutModal = (sessionId, userName, roomName, purpose, checkInTime, checkInDate) => {
+            activeCheckoutSession = { sessionId, userName, roomName, purpose, checkInTime, checkInDate };
+            document.getElementById('modalUserName').innerText = userName;
+            document.getElementById('modalRoomName').innerText = roomName;
+            document.getElementById('modalPurpose').innerText = purpose || "-";
+            document.getElementById('modalCheckInTime').innerText = checkInTime;
+            document.getElementById('checkoutRemarks').value = "";
+
+            const equipContainer = document.getElementById('modalEquipmentList');
+            const roomEquip = allEquipment.filter(e => e.room === roomName);
+            equipmentStates = {};
+
+            if (roomEquip.length === 0) {
+                equipContainer.innerHTML = `<p class="text-slate-400 text-xs italic py-2">ไม่มีรายการครุภัณฑ์บันทึกในห้องนี้ (สมบูรณ์ปกติ)</p>`;
+            } else {
+                equipContainer.innerHTML = roomEquip.map(e => {
+                    equipmentStates[e.docId] = 'normal';
+                    return `
+                        <div class="glass-card p-3 rounded-2xl flex items-center justify-between text-xs">
+                            <div>
+                                <strong class="text-slate-800 text-xs sm:text-sm block">${e.name}</strong>
+                                <span class="text-slate-400">เลขครุภัณฑ์: ${e.assetId}</span>
+                            </div>
+                            <div class="flex space-x-1" id="btnGroup-${e.docId}">
+                                <button type="button" onclick="setEquipState('${e.docId}', 'normal')" class="px-3 py-1.5 rounded-xl bg-emerald-500 text-white font-bold shadow-sm">🟢 ปกติ</button>
+                                <button type="button" onclick="setEquipState('${e.docId}', 'issue')" class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold">🔴 ชำรุด</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            document.getElementById('checkoutModal').classList.remove('hidden');
+        };
+
+        window.setEquipState = (equipId, state) => {
+            equipmentStates[equipId] = state;
+            const container = document.getElementById(`btnGroup-${equipId}`);
+            if(state === 'normal') {
+                container.innerHTML = `
+                    <button type="button" onclick="setEquipState('${equipId}', 'normal')" class="px-3 py-1.5 rounded-xl bg-emerald-500 text-white font-bold shadow-sm">🟢 ปกติ</button>
+                    <button type="button" onclick="setEquipState('${equipId}', 'issue')" class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold">🔴 ชำรุด</button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button type="button" onclick="setEquipState('${equipId}', 'normal')" class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold">🟢 ปกติ</button>
+                    <button type="button" onclick="setEquipState('${equipId}', 'issue')" class="px-3 py-1.5 rounded-xl bg-rose-500 text-white font-bold shadow-sm">🔴 ชำรุด</button>
+                `;
             }
         };
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').classList.add('hidden');
+        }
+
+        // 🌟 บันทึกข้อมูลไปยัง 'logs' และลบจาก 'active_sessions'
+        async function confirmCheckout() {
+            if(!activeCheckoutSession) return;
+            try {
+                const now = new Date();
+                const checkOutTime = now.toLocaleTimeString('th-TH');
+                const remarks = document.getElementById('checkoutRemarks').value.trim();
+
+                // 1. เพิ่มเอกสารบันทึกเข้า logs
+                await addDoc(collection(db, "logs"), {
+                    userName: activeCheckoutSession.userName,
+                    room: activeCheckoutSession.roomName,
+                    purpose: activeCheckoutSession.purpose || "-",
+                    checkInTime: activeCheckoutSession.checkInTime,
+                    checkOutTime: checkOutTime,
+                    date: activeCheckoutSession.checkInDate || now.toLocaleDateString('th-TH'),
+                    roomCheck: {
+                        air: document.getElementById('chkAir').checked,
+                        light: document.getElementById('chkLight').checked,
+                        plug: document.getElementById('chkPlug').checked,
+                        clean: document.getElementById('chkClean').checked
+                    },
+                    equipmentStates: equipmentStates,
+                    remarks: remarks || "-",
+                    timestamp: serverTimestamp()
+                });
+
+                // 2. ลบออกจาก active_sessions
+                await deleteDoc(doc(db, "active_sessions", activeCheckoutSession.sessionId));
+
+                closeCheckoutModal();
+                alert("บันทึกส่งคืนห้องและตรวจเช็กความพร้อมเรียบร้อยแล้ว");
+                switchTab('logs');
+            } catch (e) {
+                alert("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
+            }
+        }
 
         function renderLogs(logs) {
             const container = document.getElementById('logsTableBody');
@@ -572,19 +750,102 @@
                 container.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-slate-400 text-xs italic">ไม่พบประวัติการเข้าใช้งาน</td></tr>`;
                 return;
             }
-            container.innerHTML = logs.map(l => `
-                <tr class="hover:bg-slate-100/60 transition">
-                    <td class="py-3 px-4 font-bold text-slate-800">${l.userName}</td>
-                    <td class="py-3 px-4"><span class="px-2 py-0.5 bg-sky-500/10 text-sky-700 rounded text-xs font-semibold">${l.room}</span></td>
-                    <td class="py-3 px-4 text-emerald-600 font-medium">${l.purpose || '-'}</td>
-                    <td class="py-3 px-4 text-xs text-slate-600">${l.date}</td>
-                    <td class="py-3 px-4 text-emerald-600 font-bold">${l.checkInTime || '-'}</td>
-                    <td class="py-3 px-4 text-rose-600 font-bold">${l.checkOutTime || '-'}</td>
-                    <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-700 rounded-full text-xs font-bold">🟢 สมบูรณ์</span></td>
-                    <td class="py-3 px-4 text-center"><button class="px-2.5 py-1 bg-slate-200/80 text-slate-700 rounded-lg text-xs font-bold">👁️ ดู</button></td>
-                </tr>
+            container.innerHTML = logs.map(l => {
+                const hasIssue = Object.values(l.equipmentStates || {}).includes('issue') || (l.remarks && l.remarks !== "-");
+                return `
+                    <tr class="hover:bg-slate-100/60 transition">
+                        <td class="py-3 px-4 font-bold text-slate-800">${l.userName}</td>
+                        <td class="py-3 px-4"><span class="px-2 py-0.5 bg-sky-500/10 text-sky-700 rounded text-xs font-semibold">${l.room}</span></td>
+                        <td class="py-3 px-4 text-emerald-600 font-medium">${l.purpose || '-'}</td>
+                        <td class="py-3 px-4 text-xs text-slate-600">${l.date}</td>
+                        <td class="py-3 px-4 text-emerald-600 font-bold">${l.checkInTime || '-'}</td>
+                        <td class="py-3 px-4 text-rose-600 font-bold">${l.checkOutTime || '-'}</td>
+                        <td class="py-3 px-4 text-center">
+                            ${hasIssue ? 
+                                `<span class="px-2 py-0.5 bg-rose-500/20 text-rose-700 rounded-full text-xs font-bold">🔴 มีข้อสังเกต</span>` : 
+                                `<span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-700 rounded-full text-xs font-bold">🟢 สมบูรณ์</span>`
+                            }
+                        </td>
+                        <td class="py-3 px-4 text-center"><button class="px-2.5 py-1 bg-slate-200/80 text-slate-700 rounded-lg text-xs font-bold">👁️ ดู</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function verifyAdminPassword() {
+            const pass = document.getElementById('adminPasswordInput').value;
+            if (pass === "Rmsc4_admin") {
+                document.getElementById('adminAuthBox').classList.add('hidden');
+                document.getElementById('adminMainContent').classList.remove('hidden');
+            } else {
+                alert("รหัสผ่านไม่ถูกต้อง");
+            }
+        }
+
+        function logoutAdmin() {
+            document.getElementById('adminPasswordInput').value = "";
+            document.getElementById('adminAuthBox').classList.remove('hidden');
+            document.getElementById('adminMainContent').classList.add('hidden');
+        }
+
+        async function addNewRoom() {
+            const name = document.getElementById('newRoomName').value.trim();
+            if(!name) return alert("กรุณาระบุชื่อห้องใหม่");
+            if(!roomsList.includes(name)) {
+                roomsList.push(name);
+                updateRoomDropdowns();
+                renderRoomDashboard();
+                document.getElementById('newRoomName').value = "";
+                alert("เพิ่มห้องเรียบร้อย");
+            }
+        }
+
+        async function addNewUser() {
+            const id = document.getElementById('newUserId').value.trim();
+            const name = document.getElementById('newUserName').value.trim();
+            if(!id || !name) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+
+            await addDoc(collection(db, "users"), { id, name });
+            document.getElementById('newUserId').value = "";
+            document.getElementById('newUserName').value = "";
+            alert("เพิ่มผู้ใช้งานสำเร็จ");
+        }
+
+        async function addNewEquipment() {
+            const room = document.getElementById('equipRoomSelect').value;
+            const assetId = document.getElementById('newEquipAssetId').value.trim();
+            const name = document.getElementById('newEquipName').value.trim();
+            if(!assetId || !name) return alert("กรุณากรอกข้อมูลครุภัณฑ์ให้ครบถ้วน");
+
+            await addDoc(collection(db, "equipment"), { room, assetId, name });
+            document.getElementById('newEquipAssetId').value = "";
+            document.getElementById('newEquipName').value = "";
+            alert("เพิ่มรายการครุภัณฑ์สำเร็จ");
+        }
+
+        function renderAdminEquipment() {
+            const container = document.getElementById('adminEquipmentList');
+            if(!container) return;
+            if(!allEquipment || allEquipment.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-xs italic">ยังไม่มีรายการครุภัณฑ์ในระบบ</p>`;
+                return;
+            }
+            container.innerHTML = allEquipment.map(e => `
+                <div class="glass-card p-2.5 rounded-xl flex items-center justify-between text-xs">
+                    <div>
+                        <span class="px-2 py-0.5 bg-sky-500/10 text-sky-700 font-bold rounded mr-1.5">${e.room}</span>
+                        <strong class="text-slate-800">${e.name}</strong> (${e.assetId})
+                    </div>
+                    <button onclick="deleteEquipment('${e.docId}')" class="text-rose-500 hover:text-rose-700 font-bold px-2"><i class="fa-solid fa-trash"></i></button>
+                </div>
             `).join('');
         }
+
+        window.deleteEquipment = async (docId) => {
+            if(confirm("ยืนยันการลบครุภัณฑ์นี้?")) {
+                await deleteDoc(doc(db, "equipment", docId));
+            }
+        };
     </script>
 </body>
 </html>
