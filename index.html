@@ -191,32 +191,6 @@
                     </button>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    <div>
-                        <label class="block font-medium mb-1 text-slate-500">ห้องปฏิบัติการ:</label>
-                        <select id="filterRoom" class="w-full p-2.5 rounded-xl glass-card font-medium outline-none"><option value="all">ทุกห้อง</option></select>
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1 text-slate-500">ชื่อผู้ใช้งาน:</label>
-                        <select id="filterUser" class="w-full p-2.5 rounded-xl glass-card font-medium outline-none"><option value="all">ผู้ใช้ทั้งหมด</option></select>
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1 text-slate-500">สถานะครุภัณฑ์:</label>
-                        <select id="filterStatus" class="w-full p-2.5 rounded-xl glass-card font-medium outline-none">
-                            <option value="all">ทุกสถานะ</option>
-                            <option value="issue">🔴 มีข้อสังเกต / ชำรุด</option>
-                            <option value="normal">🟢 สมบูรณ์ปกติ</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-medium mb-1 text-slate-500">จัดเรียงลำดับ:</label>
-                        <select id="sortOrder" class="w-full p-2.5 rounded-xl glass-card font-medium outline-none">
-                            <option value="desc">⏱️ ล่าสุด ➔ เก่าสุด</option>
-                            <option value="asc">⏱️ เก่าสุด ➔ ล่าสุด</option>
-                        </select>
-                    </div>
-                </div>
-
                 <div class="overflow-x-auto rounded-2xl border border-slate-200/80 shadow-sm bg-white/40">
                     <table class="w-full text-left text-xs sm:text-sm">
                         <thead class="bg-slate-100/90 font-bold uppercase text-[11px] tracking-wider text-slate-700">
@@ -228,6 +202,7 @@
                                 <th class="py-3 px-4">เวลาเข้า</th>
                                 <th class="py-3 px-4">เวลาออก</th>
                                 <th class="py-3 px-4 text-center">สถานะครุภัณฑ์</th>
+                                <th class="py-3 px-4 text-center">ดูรายละเอียด</th>
                             </tr>
                         </thead>
                         <tbody id="logsTableBody" class="divide-y divide-slate-200/60"></tbody>
@@ -388,6 +363,66 @@
         </div>
     </div>
 
+    <!-- 🌟 LOG DETAILS MODAL (ดูประวัติอย่างละเอียด) -->
+    <div id="logDetailsModal" class="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 hidden z-50">
+        <div class="glass-panel rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl bg-white/95 overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-base text-slate-800 flex items-center">
+                    <i class="fa-solid fa-file-invoice text-sky-500 mr-2.5"></i>รายละเอียดการเข้าใช้งานห้องปฏิบัติการ
+                </h3>
+                <button id="closeLogDetailsModalBtn" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4 flex-1 text-xs sm:text-sm">
+                <!-- User & Session Info -->
+                <div class="p-4 rounded-2xl bg-sky-50 border border-sky-100 space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <strong id="detailUserName" class="text-sm text-slate-800 font-bold">-</strong>
+                        <span id="detailDate" class="text-xs bg-white px-2.5 py-0.5 rounded-md text-slate-500 font-medium shadow-sm">-</span>
+                    </div>
+                    <p class="text-sky-700 font-semibold"><i class="fa-solid fa-door-open mr-1"></i><span id="detailRoomName">-</span></p>
+                    <p class="text-slate-600"><i class="fa-solid fa-vial mr-1 text-emerald-500"></i><strong>วัตถุประสงค์:</strong> <span id="detailPurpose">-</span></p>
+                </div>
+
+                <!-- Time & Duration Summary Box -->
+                <div class="grid grid-cols-3 gap-2 text-center p-3.5 rounded-2xl bg-slate-100/80 border border-slate-200">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block uppercase font-bold">เวลาเข้า</span>
+                        <strong id="detailCheckIn" class="text-emerald-600 font-bold text-xs sm:text-sm">-</strong>
+                    </div>
+                    <div class="border-x border-slate-200">
+                        <span class="text-[10px] text-slate-400 block uppercase font-bold">เวลาออก</span>
+                        <strong id="detailCheckOut" class="text-rose-600 font-bold text-xs sm:text-sm">-</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-sky-600 block uppercase font-bold">ระยะเวลาใช้งาน</span>
+                        <strong id="detailDuration" class="text-sky-600 font-bold text-xs sm:text-sm">-</strong>
+                    </div>
+                </div>
+
+                <!-- Checklist Verification -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 flex items-center"><i class="fa-solid fa-list-check text-sky-500 mr-2"></i>การตรวจความเรียบร้อยก่อนคืนห้อง</h4>
+                    <div id="detailChecklist" class="grid grid-cols-2 gap-2 text-xs"></div>
+                </div>
+
+                <!-- Equipment Status -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-800 flex items-center"><i class="fa-solid fa-microscope text-teal-500 mr-2"></i>สภาพครุภัณฑ์ในห้อง</h4>
+                    <div id="detailEquipment" class="space-y-1.5"></div>
+                </div>
+
+                <!-- Remarks -->
+                <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-1">
+                    <strong class="font-bold block flex items-center"><i class="fa-solid fa-comment-dots mr-1.5"></i>หมายเหตุ / ข้อสังเกตเพิ่มเติม:</strong>
+                    <p id="detailRemarks" class="text-slate-700 italic">-</p>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-200 text-right">
+                <button id="closeLogDetailsModalBtn2" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SCRIPT MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -498,6 +533,10 @@
             document.getElementById('closeCheckoutModalBtn').addEventListener('click', closeCheckoutModal);
             document.getElementById('cancelCheckoutModalBtn').addEventListener('click', closeCheckoutModal);
             document.getElementById('confirmCheckoutModalBtn').addEventListener('click', confirmCheckout);
+
+            // Log Details Modal Events
+            document.getElementById('closeLogDetailsModalBtn').addEventListener('click', () => document.getElementById('logDetailsModal').classList.add('hidden'));
+            document.getElementById('closeLogDetailsModalBtn2').addEventListener('click', () => document.getElementById('logDetailsModal').classList.add('hidden'));
 
             document.querySelectorAll('.quick-purpose-btn').forEach(btn => {
                 btn.addEventListener('click', () => document.getElementById('checkInPurposeInput').value = btn.getAttribute('data-quick-purpose'));
@@ -659,7 +698,6 @@
             }).join('');
         }
 
-        // 🌟 เปิด MODAL คืนห้อง
         window.openCheckoutModal = (sessionId, userName, roomName, purpose, checkInTime, checkInDate) => {
             activeCheckoutSession = { sessionId, userName, roomName, purpose, checkInTime, checkInDate };
             document.getElementById('modalUserName').innerText = userName;
@@ -714,7 +752,6 @@
             document.getElementById('checkoutModal').classList.add('hidden');
         }
 
-        // 🌟 บันทึกข้อมูลไปยัง 'logs' และลบออกจาก 'active_sessions'
         async function confirmCheckout() {
             if(!activeCheckoutSession) return;
             try {
@@ -722,7 +759,6 @@
                 const checkOutTime = now.toLocaleTimeString('th-TH');
                 const remarks = document.getElementById('checkoutRemarks').value.trim();
 
-                // 1. เพิ่มเอกสารบันทึกลง collection "logs"
                 await addDoc(collection(db, "logs"), {
                     userName: activeCheckoutSession.userName || "-",
                     room: activeCheckoutSession.roomName || "-",
@@ -741,7 +777,6 @@
                     timestamp: serverTimestamp()
                 });
 
-                // 2. ลบออกจาก collection "active_sessions"
                 if (activeCheckoutSession.sessionId) {
                     await deleteDoc(doc(db, "active_sessions", activeCheckoutSession.sessionId));
                 }
@@ -755,21 +790,53 @@
             }
         }
 
+        // 🌟 ฟังก์ชันคำนวณระยะเวลาใช้งาน
+        function calculateDuration(timeIn, timeOut) {
+            try {
+                const parseTime = (tStr) => {
+                    if(!tStr || tStr === '-') return null;
+                    const cleanStr = tStr.replace(' น.', '').trim();
+                    const parts = cleanStr.split(':');
+                    if(parts.length < 2) return null;
+                    const d = new Date();
+                    d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0);
+                    return d;
+                };
+
+                const start = parseTime(timeIn);
+                const end = parseTime(timeOut);
+
+                if(!start || !end || end < start) return "ไม่สามารถคำนวณได้";
+
+                const diffMs = end - start;
+                const diffMins = Math.floor(diffMs / 60000);
+                const hours = Math.floor(diffMins / 60);
+                const mins = diffMins % 60;
+
+                if(hours > 0) {
+                    return `${hours} ชั่วโมง ${mins} นาที`;
+                }
+                return `${mins} นาที`;
+            } catch (e) {
+                return "-";
+            }
+        }
+
+        // 🌟 แสดงตารางประวัติใช้งาน + ปุ่มดูรายละเอียด
         function renderLogs(logs) {
             const container = document.getElementById('logsTableBody');
             if(!logs || logs.length === 0) {
-                container.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 text-xs italic">ไม่พบประวัติการเข้าใช้งาน</td></tr>`;
+                container.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-slate-400 text-xs italic">ไม่พบประวัติการเข้าใช้งาน</td></tr>`;
                 return;
             }
 
-            // เรียงลำดับจากล่าสุดไปเก่าสุด
             const sortedLogs = [...logs].sort((a, b) => {
                 const timeA = a.timestamp?.seconds || 0;
                 const timeB = b.timestamp?.seconds || 0;
                 return timeB - timeA;
             });
 
-            container.innerHTML = sortedLogs.map(l => {
+            container.innerHTML = sortedLogs.map((l, index) => {
                 const hasIssue = Object.values(l.equipmentStates || {}).includes('issue') || (l.remarks && l.remarks !== "-");
                 return `
                     <tr class="hover:bg-slate-100/60 transition">
@@ -785,10 +852,65 @@
                                 `<span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-700 rounded-full text-xs font-bold">🟢 สมบูรณ์</span>`
                             }
                         </td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="viewLogDetail(${index})" class="px-3 py-1 bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 rounded-xl text-xs font-bold transition">
+                                👁️ ดู
+                            </button>
+                        </td>
                     </tr>
                 `;
             }).join('');
+
+            window.currentSortedLogs = sortedLogs;
         }
+
+        // 🌟 เปิด Modal แสดงรายละเอียดประวัติแบบเจาะลึก
+        window.viewLogDetail = (index) => {
+            const log = window.currentSortedLogs[index];
+            if(!log) return;
+
+            document.getElementById('detailUserName').innerText = log.userName || "-";
+            document.getElementById('detailDate').innerText = log.date || "-";
+            document.getElementById('detailRoomName').innerText = log.room || "-";
+            document.getElementById('detailPurpose').innerText = log.purpose || "-";
+            document.getElementById('detailCheckIn').innerText = log.checkInTime || "-";
+            document.getElementById('detailCheckOut').innerText = log.checkOutTime || "-";
+            document.getElementById('detailDuration').innerText = calculateDuration(log.checkInTime, log.checkOutTime);
+            document.getElementById('detailRemarks').innerText = log.remarks && log.remarks !== "-" ? log.remarks : "ไม่มีข้อสังเกตเพิ่มเติม";
+
+            // Render Checklist
+            const chk = log.roomCheck || {};
+            document.getElementById('detailChecklist').innerHTML = `
+                <div class="p-2 rounded-xl bg-slate-100/70 flex items-center justify-between"><span>ปิดแอร์:</span> <strong>${chk.air ? '🟢 เรียบร้อย' : '🔴 ไม่ได้ปิด'}</strong></div>
+                <div class="p-2 rounded-xl bg-slate-100/70 flex items-center justify-between"><span>ปิดไฟ:</span> <strong>${chk.light ? '🟢 เรียบร้อย' : '🔴 ไม่ได้ปิด'}</strong></div>
+                <div class="p-2 rounded-xl bg-slate-100/70 flex items-center justify-between"><span>ถอดปลั๊ก:</span> <strong>${chk.plug ? '🟢 เรียบร้อย' : '🔴 ไม่ได้ถอด'}</strong></div>
+                <div class="p-2 rounded-xl bg-slate-100/70 flex items-center justify-between"><span>ทำความสะอาด:</span> <strong>${chk.clean ? '🟢 เรียบร้อย' : '🔴 ไม่ได้เก็บ'}</strong></div>
+            `;
+
+            // Render Equipment Condition
+            const equipStates = log.equipmentStates || {};
+            const roomEquip = allEquipment.filter(e => e.room === log.room);
+            const equipContainer = document.getElementById('detailEquipment');
+
+            if (roomEquip.length === 0) {
+                equipContainer.innerHTML = `<p class="text-slate-400 text-xs italic">ไม่มีรายการครุภัณฑ์บันทึกในห้องนี้</p>`;
+            } else {
+                equipContainer.innerHTML = roomEquip.map(e => {
+                    const st = equipStates[e.docId] || 'normal';
+                    return `
+                        <div class="glass-card p-2.5 rounded-xl flex items-center justify-between text-xs">
+                            <div>
+                                <strong class="text-slate-800">${e.name}</strong>
+                                <span class="text-slate-400 block text-[10px]">เลขครุภัณฑ์: ${e.assetId}</span>
+                            </div>
+                            <span>${st === 'normal' ? '🟢 สมบูรณ์ปกติ' : '🔴 ชำรุด/มีปัญหา'}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('logDetailsModal').classList.remove('hidden');
+        };
 
         function verifyAdminPassword() {
             const pass = document.getElementById('adminPasswordInput').value;
