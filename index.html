@@ -16,101 +16,48 @@
     <style>
         body {
             font-family: 'Prompt', 'Inter', sans-serif;
-            transition: background-color 400ms cubic-bezier(0.4, 0, 0.2, 1), color 400ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* 🟢 THEME 1: Light Pastel Sby-Eye (โทนสว่างสบายตา - Default) */
-        body.theme-light {
             background-color: #f8fafc;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(186, 230, 253, 0.5) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(187, 247, 208, 0.4) 0px, transparent 50%),
-                radial-gradient(at 50% 100%, rgba(224, 231, 255, 0.4) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(186, 230, 253, 0.55) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(187, 247, 208, 0.45) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(224, 231, 255, 0.45) 0px, transparent 50%);
             color: #0f172a;
+            background-attachment: fixed;
         }
-        body.theme-light .glass-panel {
-            background: rgba(255, 255, 255, 0.8);
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.82);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
         }
-        body.theme-light .glass-card {
+
+        /* Glassmorphism Card */
+        .glass-card {
             background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(226, 232, 240, 0.9);
             color: #1e293b;
         }
-        body.theme-light .glass-card:hover {
+
+        .glass-card:hover {
             background: rgba(255, 255, 255, 0.95);
             border-color: #38bdf8;
             box-shadow: 0 10px 25px rgba(56, 189, 248, 0.15);
+            transform: translateY(-1px);
         }
 
-        /* 🧬 THEME 2: DNA Spiral Cyber (โทนแล็บเข้ม นีออน) */
-        body.theme-dna {
-            background: #030712;
-            color: #f8fafc;
-        }
-        body.theme-dna .glass-panel {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-        }
-        body.theme-dna .glass-card {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #f1f5f9;
-        }
-        body.theme-dna .glass-card:hover {
-            background: rgba(30, 41, 59, 0.8);
-            border-color: #38bdf8;
-            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);
-        }
-
-        /* 🧸 THEME 3: Cute Mascot Lab (โทนการ์ตูนน่ารัก อบอุ่น) */
-        body.theme-cute {
-            background-color: #fff7ed;
-            background-image: 
-                radial-gradient(at 10% 10%, rgba(254, 215, 170, 0.6) 0px, transparent 40%),
-                radial-gradient(at 90% 90%, rgba(253, 164, 175, 0.4) 0px, transparent 40%);
-            color: #292524;
-        }
-        body.theme-cute .glass-panel {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(16px);
-            border: 2px solid #fed7aa;
-            box-shadow: 0 10px 25px rgba(251, 146, 60, 0.12);
-            border-radius: 2rem;
-        }
-        body.theme-cute .glass-card {
-            background: #ffffff;
-            border: 1.5px solid #ffedd5;
-            color: #44403c;
-            border-radius: 1.25rem;
-        }
-        body.theme-cute .glass-card:hover {
-            border-color: #f97316;
-            box-shadow: 0 8px 20px rgba(249, 115, 22, 0.15);
-        }
-
-        /* Canvas สายเกลียว DNA หมุน */
+        /* DNA Canvas Backdrop */
         #dnaCanvas {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
             pointer-events: none;
             z-index: 0;
-            opacity: 0.35;
-            display: none;
-        }
-
-        /* Mascot Elements for Cute Theme */
-        .mascot-bg {
-            position: fixed;
-            pointer-events: none;
-            opacity: 0.15;
-            z-index: 0;
-            user-select: none;
+            opacity: 0.4;
         }
 
         /* Micro Interactions */
@@ -125,53 +72,33 @@
         ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.7); }
     </style>
 </head>
-<body class="theme-light h-full flex flex-col antialiased selection:bg-sky-500 selection:text-white relative overflow-x-hidden min-h-screen">
+<body class="h-full flex flex-col antialiased selection:bg-sky-500 selection:text-white relative overflow-x-hidden min-h-screen">
 
     <!-- DNA Animation Canvas -->
     <canvas id="dnaCanvas"></canvas>
 
-    <!-- Cute Mascot Floating Elements -->
-    <div class="mascot-bg top-12 left-6 text-6xl lg:text-8xl hidden" id="mascot1">🧪</div>
-    <div class="mascot-bg bottom-16 right-8 text-7xl lg:text-9xl hidden" id="mascot2">🧫</div>
-    <div class="mascot-bg top-1/2 left-10 text-6xl lg:text-8xl hidden" id="mascot3">🔬</div>
-
     <!-- TOP NAV HEADER -->
-    <header class="sticky top-0 z-40 px-4 lg:px-8 py-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/60 dark:border-white/10 shadow-sm">
+    <header class="sticky top-0 z-40 px-4 lg:px-8 py-3 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-sm">
         <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center space-x-3.5">
                 <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-sky-500 to-teal-400 flex items-center justify-center text-white text-xl shadow-md shadow-sky-500/25">
                     <i class="fa-solid fa-flask-vial"></i>
                 </div>
                 <div>
-                    <h1 class="text-base sm:text-lg lg:text-xl font-bold tracking-tight leading-tight">Smart Lab Access</h1>
-                    <p class="text-[10px] sm:text-[11px] text-sky-600 dark:text-sky-400 font-medium">RMSC-4 Dual-View Edition (Mobile & PC)</p>
+                    <h1 class="text-base sm:text-lg lg:text-xl font-bold tracking-tight leading-tight text-slate-800">Smart Lab Access</h1>
+                    <p class="text-[10px] sm:text-[11px] text-sky-600 font-semibold">RMSC-4 Smart Eye-Care Edition</p>
                 </div>
             </div>
 
-            <!-- Theme Selector Bar -->
-            <div class="flex items-center space-x-2">
-                <div class="bg-slate-200/70 dark:bg-slate-800/70 p-1 rounded-2xl flex items-center space-x-1 backdrop-blur-md border border-slate-300/50 dark:border-white/10">
-                    <button onclick="setTheme('light')" id="btn-theme-light" title="โทนสว่าง สบายตา" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-all bg-sky-500 text-white shadow-sm">
-                        ☀️ สบายตา
-                    </button>
-                    <button onclick="setTheme('dna')" id="btn-theme-dna" title="สายเกลียว DNA หมุน" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-800">
-                        🧬 DNA
-                    </button>
-                    <button onclick="setTheme('cute')" id="btn-theme-cute" title="การ์ตูนน่ารัก" class="px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-800">
-                        🧸 น่ารัก
-                    </button>
-                </div>
-
-                <button id="navAdminBtn" class="bg-sky-500 hover:bg-sky-600 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-2xl apple-transition-btn flex items-center space-x-1.5 shadow-md">
-                    <i class="fa-solid fa-sliders"></i>
-                    <span class="hidden sm:inline">จัดการระบบ</span>
-                </button>
-            </div>
+            <button id="navAdminBtn" class="bg-sky-500 hover:bg-sky-600 active:scale-95 text-white text-xs sm:text-sm font-medium px-4 py-2 rounded-2xl apple-transition-btn flex items-center space-x-2 shadow-md shadow-sky-500/20">
+                <i class="fa-solid fa-sliders"></i>
+                <span class="hidden sm:inline">จัดการระบบ</span>
+            </button>
         </div>
     </header>
 
     <!-- Cloud Connection Status Bar -->
-    <div id="connectionStatus" class="bg-emerald-500/10 border-b border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs py-1.5 text-center font-medium backdrop-blur-md">
+    <div id="connectionStatus" class="bg-emerald-500/10 border-b border-emerald-500/20 text-emerald-700 text-xs py-1.5 text-center font-medium backdrop-blur-md">
         <i class="fa-solid fa-cloud-check mr-1.5"></i>เชื่อมต่อฐานข้อมูล Cloud (Acclab Firebase) เรียลไทม์สมบูรณ์
     </div>
 
@@ -180,26 +107,26 @@
 
         <!-- Top Room Dropdown Selector -->
         <div class="glass-card p-3 rounded-2xl flex items-center justify-between gap-3 shadow-sm">
-            <span class="text-xs sm:text-sm font-bold text-sky-600 dark:text-sky-400 flex items-center">
+            <span class="text-xs sm:text-sm font-bold text-sky-600 flex items-center">
                 <i class="fa-solid fa-door-open mr-2 text-base"></i>สลับห้องปฏิบัติการ:
             </span>
-            <select id="topRoomSelect" class="bg-transparent text-xs sm:text-sm font-bold focus:outline-none cursor-pointer flex-1 text-right pr-2">
-                <!-- Dynamic Rooms Populated Here -->
+            <select id="topRoomSelect" class="bg-transparent text-xs sm:text-sm font-bold focus:outline-none cursor-pointer flex-1 text-right pr-2 text-slate-800">
+                <!-- Dynamic Rooms -->
             </select>
         </div>
 
         <!-- BENTO BOX DASHBOARD BANNER -->
         <div class="glass-panel rounded-3xl p-4 sm:p-6 relative overflow-hidden space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-white/10 pb-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
                 <div>
-                    <h2 class="text-sm sm:text-base lg:text-lg font-bold flex items-center">
+                    <h2 class="text-sm sm:text-base lg:text-lg font-bold flex items-center text-slate-800">
                         <i class="fa-solid fa-chart-pie text-sky-500 mr-2.5"></i>Dashboard สรุปสถานะทุกห้องปฏิบัติการ
                     </h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Bento Box Layout • คลิกการ์ดห้องเพื่อสลับใช้งานทันที</p>
+                    <p class="text-xs text-slate-500 hidden sm:block mt-0.5">Bento Box Layout • คลิกการ์ดห้องเพื่อสลับใช้งานทันที</p>
                 </div>
-                <div class="bg-slate-200/50 dark:bg-white/10 px-3.5 py-1.5 rounded-full flex items-center space-x-2 self-start sm:self-auto">
+                <div class="bg-slate-200/60 px-3.5 py-1.5 rounded-full flex items-center space-x-2 self-start sm:self-auto">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="dashboardSummaryCount" class="text-xs font-semibold">กำลังโหลดข้อมูล...</span>
+                    <span id="dashboardSummaryCount" class="text-xs font-semibold text-slate-700">กำลังโหลดข้อมูล...</span>
                 </div>
             </div>
 
@@ -213,15 +140,15 @@
                 <i class="fa-solid fa-grip"></i>
                 <span>เลือกชื่อเข้าใช้งาน</span>
             </button>
-            <button id="tab-btn-active" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold apple-transition-page flex items-center justify-center space-x-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5">
+            <button id="tab-btn-active" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold apple-transition-page flex items-center justify-center space-x-2 text-slate-500 hover:bg-slate-100">
                 <i class="fa-solid fa-clock-rotate-left"></i>
                 <span>สถานะใช้งาน / คืนห้อง</span>
             </button>
-            <button id="tab-btn-logs" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold apple-transition-page flex items-center justify-center space-x-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5">
+            <button id="tab-btn-logs" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold apple-transition-page flex items-center justify-center space-x-2 text-slate-500 hover:bg-slate-100">
                 <i class="fa-solid fa-clipboard-list"></i>
                 <span>ประวัติการเข้าใช้</span>
             </button>
-            <button id="tab-btn-admin" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold apple-transition-page flex items-center justify-center space-x-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5">
+            <button id="tab-btn-admin" class="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold apple-transition-page flex items-center justify-center space-x-2 text-slate-500 hover:bg-slate-100">
                 <i class="fa-solid fa-user-gear"></i>
                 <span>จัดการระบบ</span>
             </button>
@@ -232,10 +159,10 @@
             <div class="glass-panel rounded-3xl p-5 space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="font-bold text-sm sm:text-base flex items-center">
+                        <h3 class="font-bold text-sm sm:text-base flex items-center text-slate-800">
                             <i class="fa-solid fa-user-check text-sky-500 mr-2.5"></i>เลือกรายชื่อบุคลากรเพื่อสแกนเข้าใช้งาน
                         </h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">ระบุวัตถุประสงค์และชื่อเทสต์ เพื่อการสืบค้นย้อนหลังตามมาตรฐาน ISO 15189</p>
+                        <p class="text-xs text-slate-500 mt-0.5">ระบุวัตถุประสงค์และชื่อเทสต์ เพื่อการสืบค้นย้อนหลังตามมาตรฐาน ISO 15189</p>
                     </div>
                     <span class="text-xs bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full font-bold hidden sm:inline-block">
                         ISO 15189 Standard
@@ -249,8 +176,8 @@
         <div id="tab-active" class="hidden space-y-4">
             <div class="glass-panel rounded-3xl p-5 space-y-4">
                 <div>
-                    <h3 class="font-bold text-sm sm:text-base flex items-center"><i class="fa-solid fa-users-viewfinder text-amber-500 mr-2.5"></i>ผู้กำลังใช้งานห้องปฏิบัติการขณะนี้</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">แสดงรายการผู้ใช้ที่ยังอยู่ในห้องแล็บ สามารถกดคืนห้องเมื่อเสร็จสิ้นภารกิจ</p>
+                    <h3 class="font-bold text-sm sm:text-base flex items-center text-slate-800"><i class="fa-solid fa-users-viewfinder text-amber-500 mr-2.5"></i>ผู้กำลังใช้งานห้องปฏิบัติการขณะนี้</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">แสดงรายการผู้ใช้ที่ยังอยู่ในห้องแล็บ สามารถกดคืนห้องเมื่อเสร็จสิ้นภารกิจ</p>
                 </div>
                 <div id="activeSessionsList" class="space-y-3"></div>
             </div>
@@ -261,8 +188,8 @@
             <div class="glass-panel rounded-3xl p-5 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
-                        <h3 class="font-bold text-sm sm:text-base flex items-center"><i class="fa-solid fa-rectangle-list text-sky-500 mr-2.5"></i>ประวัติการเข้าใช้งาน & ตรวจเช็กห้อง</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">ตรวจสอบรายละเอียดเวลาเข้า-ออก วัตถุประสงค์ และการรายงานครุภัณฑ์</p>
+                        <h3 class="font-bold text-sm sm:text-base flex items-center text-slate-800"><i class="fa-solid fa-rectangle-list text-sky-500 mr-2.5"></i>ประวัติการเข้าใช้งาน & ตรวจเช็กห้อง</h3>
+                        <p class="text-xs text-slate-500">ตรวจสอบรายละเอียดเวลาเข้า-ออก วัตถุประสงค์ และการรายงานครุภัณฑ์</p>
                     </div>
                     <button id="exportExcelBtn" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold shadow-md active:scale-95 transition flex items-center justify-center space-x-1.5 self-start sm:self-auto">
                         <i class="fa-solid fa-file-excel text-sm"></i>
@@ -296,9 +223,9 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto rounded-2xl border border-slate-200/60 dark:border-white/10 shadow-sm">
+                <div class="overflow-x-auto rounded-2xl border border-slate-200/80 shadow-sm bg-white/40">
                     <table class="w-full text-left text-xs sm:text-sm">
-                        <thead class="bg-slate-100 dark:bg-slate-900 font-bold uppercase text-[11px] tracking-wider">
+                        <thead class="bg-slate-100/90 font-bold uppercase text-[11px] tracking-wider text-slate-700">
                             <tr>
                                 <th class="py-3 px-4">ผู้เข้าใช้งาน</th>
                                 <th class="py-3 px-4">ห้องปฏิบัติการ</th>
@@ -310,7 +237,7 @@
                                 <th class="py-3 px-4 text-center">รายละเอียด</th>
                             </tr>
                         </thead>
-                        <tbody id="logsTableBody" class="divide-y divide-slate-200/50 dark:divide-white/5"></tbody>
+                        <tbody id="logsTableBody" class="divide-y divide-slate-200/60"></tbody>
                     </table>
                 </div>
             </div>
@@ -322,32 +249,32 @@
                 <div class="w-12 h-12 bg-sky-500/20 text-sky-500 rounded-2xl flex items-center justify-center mx-auto text-2xl">
                     <i class="fa-solid fa-lock"></i>
                 </div>
-                <h3 class="text-base font-bold">เข้าสู่ระบบผู้ดูแลระบบ (Admin)</h3>
+                <h3 class="text-base font-bold text-slate-800">เข้าสู่ระบบผู้ดูแลระบบ (Admin)</h3>
                 <p class="text-xs text-slate-500">กรอกรหัสผ่านเพื่อสิทธิ์จัดการเพิ่มห้อง บุคลากร และครุภัณฑ์</p>
-                <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่าน (Rmsc4_admin)" class="w-full px-4 py-2.5 rounded-xl bg-black/5 dark:bg-black/40 border border-slate-300 dark:border-white/15 text-center text-sm outline-none">
+                <input type="password" id="adminPasswordInput" placeholder="กรอกรหัสผ่าน (Rmsc4_admin)" class="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-center text-sm outline-none">
                 <button id="verifyAdminBtn" class="w-full py-2.5 bg-sky-500 text-white font-bold rounded-xl text-sm shadow-md">ยืนยันรหัสผ่าน</button>
             </div>
 
             <div id="adminMainContent" class="hidden space-y-4">
                 <div class="flex justify-between items-center glass-panel p-4 rounded-2xl">
-                    <span class="text-xs sm:text-sm font-bold text-sky-500"><i class="fa-solid fa-shield-halved mr-1.5"></i>Admin Access Enabled</span>
-                    <button id="logoutAdminBtn" class="text-xs bg-slate-200 dark:bg-white/10 px-3 py-1.5 rounded-xl font-bold">ออกจากระบบ</button>
+                    <span class="text-xs sm:text-sm font-bold text-sky-600"><i class="fa-solid fa-shield-halved mr-1.5"></i>Admin Access Enabled</span>
+                    <button id="logoutAdminBtn" class="text-xs bg-slate-200 px-3 py-1.5 rounded-xl font-bold text-slate-700">ออกจากระบบ</button>
                 </div>
 
                 <div class="glass-panel p-5 rounded-3xl space-y-3 text-xs sm:text-sm">
-                    <h4 class="font-bold">จัดการเพิ่มห้องปฏิบัติการ</h4>
+                    <h4 class="font-bold text-slate-800">จัดการเพิ่มห้องปฏิบัติการ</h4>
                     <div class="flex flex-col sm:flex-row gap-2">
-                        <input type="text" id="newRoomName" placeholder="ระบุชื่อห้องปฏิบัติการใหม่" class="flex-1 p-2.5 rounded-xl bg-black/5 dark:bg-black/40 border outline-none">
+                        <input type="text" id="newRoomName" placeholder="ระบุชื่อห้องปฏิบัติการใหม่" class="flex-1 p-2.5 rounded-xl bg-white border border-slate-300 outline-none">
                         <button id="addNewRoomBtn" class="bg-sky-500 text-white px-4 py-2.5 rounded-xl font-bold">+ เพิ่มห้อง</button>
                     </div>
                     <div id="adminRoomsList" class="flex flex-wrap gap-2 pt-1"></div>
                 </div>
 
                 <div class="glass-panel p-5 rounded-3xl space-y-3 text-xs sm:text-sm">
-                    <h4 class="font-bold">เพิ่มผู้มีสิทธิ์ใช้งาน</h4>
+                    <h4 class="font-bold text-slate-800">เพิ่มผู้มีสิทธิ์ใช้งาน</h4>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input type="text" id="newUserId" placeholder="รหัสผู้ใช้งาน (เช่น LABPT-RMSC4-05)" class="p-2.5 rounded-xl bg-black/5 dark:bg-black/40 border outline-none">
-                        <input type="text" id="newUserName" placeholder="ชื่อ-นามสกุล" class="p-2.5 rounded-xl bg-black/5 dark:bg-black/40 border outline-none">
+                        <input type="text" id="newUserId" placeholder="รหัสผู้ใช้งาน (เช่น LABPT-RMSC4-05)" class="p-2.5 rounded-xl bg-white border border-slate-300 outline-none">
+                        <input type="text" id="newUserName" placeholder="ชื่อ-นามสกุล" class="p-2.5 rounded-xl bg-white border border-slate-300 outline-none">
                     </div>
                     <button id="addNewUserBtn" class="w-full bg-emerald-500 text-white py-2.5 rounded-xl font-bold">+ เพิ่มผู้ใช้งาน</button>
                 </div>
@@ -356,48 +283,48 @@
     </main>
 
     <!-- CHECK-IN MODAL -->
-    <div id="checkInModal" class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 hidden z-50">
-        <div class="glass-panel rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-200/60 dark:border-white/10 pb-3">
-                <h3 class="font-bold text-base flex items-center"><i class="fa-solid fa-vial-circle-check text-sky-500 mr-2.5"></i>ระบุวัตถุประสงค์ & ชื่อการทดสอบ</h3>
+    <div id="checkInModal" class="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 hidden z-50">
+        <div class="glass-panel rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl bg-white/95">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h3 class="font-bold text-base flex items-center text-slate-800"><i class="fa-solid fa-vial-circle-check text-sky-500 mr-2.5"></i>ระบุวัตถุประสงค์ & ชื่อการทดสอบ</h3>
                 <button id="closeCheckInModalBtn" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
 
             <div class="space-y-3 text-xs sm:text-sm">
-                <div class="p-3 rounded-2xl bg-sky-500/10 text-sky-700 dark:text-sky-300">
-                    <p>ผู้เข้าขอใช้งาน: <strong id="checkInModalUserName" class="text-slate-900 dark:text-white">-</strong></p>
+                <div class="p-3 rounded-2xl bg-sky-500/10 text-sky-800">
+                    <p>ผู้เข้าขอใช้งาน: <strong id="checkInModalUserName" class="text-slate-900">-</strong></p>
                     <p>ห้องปฏิบัติการ: <strong id="checkInModalRoomName" class="text-sky-600">-</strong></p>
                 </div>
 
-                <label class="block font-bold">1. เลือกวัตถุประสงค์ด่วน (Quick Select):</label>
+                <label class="block font-bold text-slate-700">1. เลือกวัตถุประสงค์ด่วน (Quick Select):</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <button type="button" data-quick-purpose="🧪 สกัดตัวอย่าง / DNA-RNA" class="quick-purpose-btn p-2.5 rounded-xl glass-card text-left text-xs">🧪 สกัดตัวอย่าง / DNA-RNA</button>
-                    <button type="button" data-quick-purpose="🧫 เตรียมน้ำยา / Mastermix" class="quick-purpose-btn p-2.5 rounded-xl glass-card text-left text-xs">🧫 เตรียมน้ำยา / Mastermix</button>
-                    <button type="button" data-quick-purpose="🧬 เติม Template / Additive" class="quick-purpose-btn p-2.5 rounded-xl glass-card text-left text-xs">🧬 เติม Template / Additive</button>
-                    <button type="button" data-quick-purpose="🔬 เครื่อง PCR / Amplification" class="quick-purpose-btn p-2.5 rounded-xl glass-card text-left text-xs">🔬 เครื่อง PCR / Amplification</button>
+                    <button type="button" data-quick-purpose="🧪 สกัดตัวอย่าง / DNA-RNA" class="quick-purpose-btn p-2.5 rounded-xl glass-card text-left text-xs hover:bg-sky-500/10">🧪 สกัดตัวอย่าง / DNA-RNA</button>
+                    <button type="button" data-quick-purpose="🧫 เตรียมน้ำยา / Mastermix" class="quick-purpose-btn p-2.5 rounded-xl glass-card text-left text-xs hover:bg-sky-500/10">🧫 เตรียมน้ำยา / Mastermix</button>
+                    <button type="button" data-quick-purpose="🧬 เติม Template / Additive" class="quick-purpose-btn p-2.5 rounded-xl glass-card text-left text-xs hover:bg-sky-500/10">🧬 เติม Template / Additive</button>
+                    <button type="button" data-quick-purpose="🔬 เครื่อง PCR / Amplification" class="quick-purpose-btn p-2.5 rounded-xl glass-card text-left text-xs hover:bg-sky-500/10">🔬 เครื่อง PCR / Amplification</button>
                 </div>
 
-                <label class="block font-bold pt-1">2. วัตถุประสงค์หลัก:</label>
-                <input type="text" id="checkInPurposeInput" placeholder="พิมพ์ระบุวัตถุประสงค์เพิ่มเติม..." class="w-full p-3 rounded-2xl bg-black/5 dark:bg-black/40 border border-slate-300 dark:border-white/15 outline-none">
+                <label class="block font-bold text-slate-700 pt-1">2. วัตถุประสงค์หลัก:</label>
+                <input type="text" id="checkInPurposeInput" placeholder="พิมพ์ระบุวัตถุประสงค์เพิ่มเติม..." class="w-full p-3 rounded-2xl bg-white border border-slate-300 outline-none">
 
-                <label class="block font-bold text-emerald-600 dark:text-emerald-400 pt-1">3. ชื่อการทดสอบ / Test Name:</label>
+                <label class="block font-bold text-emerald-600 pt-1">3. ชื่อการทดสอบ / Test Name:</label>
                 <div class="flex flex-wrap gap-1.5 mb-1">
-                    <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 font-medium" data-test="HPV Real-time PCR">HPV Real-time PCR</button>
-                    <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 font-medium" data-test="HLA-B*5801">HLA-B*5801</button>
-                    <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 font-medium" data-test="Dengue PCR">Dengue PCR</button>
-                    <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 font-medium" data-test="Respiratory Panel">Respiratory Panel</button>
+                    <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 font-medium" data-test="HPV Real-time PCR">HPV Real-time PCR</button>
+                    <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 font-medium" data-test="HLA-B*5801">HLA-B*5801</button>
+                    <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 font-medium" data-test="Dengue PCR">Dengue PCR</button>
+                    <button type="button" class="quick-test-tag text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 font-medium" data-test="Respiratory Panel">Respiratory Panel</button>
                 </div>
-                <input type="text" id="checkInTestNameInput" placeholder="ระบุชื่อเทสต์ (เช่น HPV Real-time PCR)..." class="w-full p-3 rounded-2xl bg-black/5 dark:bg-black/40 border border-emerald-500/30 outline-none">
+                <input type="text" id="checkInTestNameInput" placeholder="ระบุชื่อเทสต์ (เช่น HPV Real-time PCR)..." class="w-full p-3 rounded-2xl bg-white border border-emerald-500/40 outline-none">
             </div>
 
             <div class="flex justify-end space-x-2.5 pt-2">
-                <button id="cancelCheckInModalBtn" class="px-4 py-2.5 bg-slate-200 dark:bg-white/10 rounded-2xl text-xs font-bold">ยกเลิก</button>
+                <button id="cancelCheckInModalBtn" class="px-4 py-2.5 bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold">ยกเลิก</button>
                 <button id="confirmCheckInModalBtn" class="px-5 py-2.5 bg-sky-500 text-white rounded-2xl text-xs font-bold shadow-md">ยืนยันการเข้าใช้งาน (Check-In)</button>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT MODULE WITH RESPONSIVE LAYOUT & THEME CONTROLLER -->
+    <!-- SCRIPT MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, addDoc, doc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -415,35 +342,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 🎨 Theme Switcher Logic
-        window.setTheme = (themeName) => {
-            document.body.className = `theme-${themeName} h-full flex flex-col antialiased selection:bg-sky-500 selection:text-white relative overflow-x-hidden min-h-screen`;
-            
-            const canvas = document.getElementById('dnaCanvas');
-            const mascots = [document.getElementById('mascot1'), document.getElementById('mascot2'), document.getElementById('mascot3')];
-            
-            if(themeName === 'dna') {
-                canvas.style.display = 'block';
-                mascots.forEach(m => m.classList.add('hidden'));
-            } else if(themeName === 'cute') {
-                canvas.style.display = 'none';
-                mascots.forEach(m => m.classList.remove('hidden'));
-            } else {
-                canvas.style.display = 'none';
-                mascots.forEach(m => m.classList.add('hidden'));
-            }
-
-            ['light', 'dna', 'cute'].forEach(t => {
-                const btn = document.getElementById(`btn-theme-${t}`);
-                if(t === themeName) {
-                    btn.className = "px-2.5 py-1 rounded-xl text-xs font-bold transition-all bg-sky-500 text-white shadow-sm";
-                } else {
-                    btn.className = "px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-800";
-                }
-            });
-        };
-
-        // 🧬 DNA Animation Canvas
+        // 🧬 DNA Animation Canvas (Subtle Background)
         const canvas = document.getElementById('dnaCanvas');
         const ctx = canvas.getContext('2d');
         let width = canvas.width = window.innerWidth;
@@ -458,32 +357,32 @@
         function drawDNA() {
             ctx.clearRect(0, 0, width, height);
             const numNodes = 32;
-            const xCenter = width * 0.88;
+            const xCenter = width > 768 ? width * 0.88 : width * 0.85; // ปรับตำแหน่งตามขนาดหน้าจอ
             
             for(let i = 0; i < numNodes; i++) {
                 const y = (height / numNodes) * i;
                 const offset = i * 0.35 + t;
-                const x1 = xCenter + Math.sin(offset) * 65;
-                const x2 = xCenter - Math.sin(offset) * 65;
+                const x1 = xCenter + Math.sin(offset) * 55;
+                const x2 = xCenter - Math.sin(offset) * 55;
 
                 ctx.beginPath();
                 ctx.moveTo(x1, y);
                 ctx.lineTo(x2, y);
-                ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.28)';
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
 
                 ctx.beginPath();
-                ctx.arc(x1, y, 4, 0, Math.PI * 2);
-                ctx.fillStyle = '#38bdf8';
+                ctx.arc(x1, y, 3.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#0284c7';
                 ctx.fill();
 
                 ctx.beginPath();
-                ctx.arc(x2, y, 4, 0, Math.PI * 2);
-                ctx.fillStyle = '#34d399';
+                ctx.arc(x2, y, 3.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#10b981';
                 ctx.fill();
             }
-            t += 0.03;
+            t += 0.025;
             requestAnimationFrame(drawDNA);
         }
         drawDNA();
@@ -536,7 +435,7 @@
                 tag.addEventListener('click', () => document.getElementById('checkInTestNameInput').value = tag.getAttribute('data-test'));
             });
 
-            // Firebase Listeners
+            // Firebase Realtime Listeners
             onSnapshot(collection(db, "active_sessions"), (snapshot) => {
                 activeSessionsData = [];
                 snapshot.forEach(doc => activeSessionsData.push({ id: doc.id, ...doc.data() }));
@@ -557,7 +456,7 @@
         function switchTab(tab) {
             ['checkin', 'active', 'logs', 'admin'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
-                document.getElementById(`tab-btn-${t}`).className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold apple-transition-page flex items-center justify-center space-x-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5";
+                document.getElementById(`tab-btn-${t}`).className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold apple-transition-page flex items-center justify-center space-x-2 text-slate-500 hover:bg-slate-100";
             });
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             document.getElementById(`tab-btn-${tab}`).className = "flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold apple-transition-page flex items-center justify-center space-x-2 bg-sky-500 text-white shadow-md";
@@ -579,11 +478,11 @@
                 return `
                     <div onclick="changeRoom('${rName}')" class="glass-card p-3 rounded-2xl cursor-pointer apple-transition-btn text-left ${isSelected ? 'ring-2 ring-sky-500 bg-sky-500/10' : ''}">
                         <span class="text-[10px] font-bold text-slate-400 block truncate">${rName.split(' ')[0]}</span>
-                        <strong class="text-xs block truncate mt-0.5">${rName.split('(')[1]?.replace(')', '') || rName}</strong>
+                        <strong class="text-xs block truncate mt-0.5 text-slate-800">${rName.split('(')[1]?.replace(')', '') || rName}</strong>
                         <div class="mt-2">
                             ${active ? 
-                                `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 font-bold block truncate">🔴 ${active.userName.split(' ')[0]}</span>` : 
-                                `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 font-bold inline-block">🟢 ว่าง</span>`
+                                `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 font-bold block truncate">🔴 ${active.userName.split(' ')[0]}</span>` : 
+                                `<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 font-bold inline-block">🟢 ว่าง</span>`
                             }
                         </div>
                     </div>
@@ -605,11 +504,11 @@
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-600 flex items-center justify-center font-bold text-sm"><i class="fa-solid fa-user"></i></div>
                         <div>
-                            <h4 class="font-bold text-xs sm:text-sm">${u.name}</h4>
-                            <p class="text-[11px] text-sky-500 font-medium">🟢 แตะเพื่อสแกนเข้าใช้งาน</p>
+                            <h4 class="font-bold text-xs sm:text-sm text-slate-800">${u.name}</h4>
+                            <p class="text-[11px] text-sky-600 font-medium">🟢 แตะเพื่อสแกนเข้าใช้งาน</p>
                         </div>
                     </div>
-                    <span class="text-[10px] bg-slate-200/60 dark:bg-white/10 px-2 py-1 rounded-lg font-mono font-bold">${u.id}</span>
+                    <span class="text-[10px] bg-slate-200/80 px-2 py-1 rounded-lg font-mono font-bold text-slate-700">${u.id}</span>
                 </button>
             `).join('');
         }
@@ -652,11 +551,11 @@
             container.innerHTML = activeSessionsData.map(s => `
                 <div class="glass-card p-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm">
                     <div class="space-y-1">
-                        <span class="px-2.5 py-0.5 bg-sky-500/20 text-sky-600 font-bold rounded-md text-[11px] mr-1.5">${s.room}</span>
-                        <strong class="font-bold text-sm block">${s.userName} (${s.userId})</strong>
+                        <span class="px-2.5 py-0.5 bg-sky-500/20 text-sky-700 font-bold rounded-md text-[11px] mr-1.5">${s.room}</span>
+                        <strong class="font-bold text-sm block text-slate-800">${s.userName} (${s.userId})</strong>
                         <p class="text-xs text-emerald-600 font-medium">🎯 ${s.purpose}</p>
                     </div>
-                    <button onclick="deleteSession('${s.id}')" class="px-4 py-2 bg-amber-500/20 text-amber-600 font-bold rounded-xl text-xs active:scale-95 transition">คืนห้อง</button>
+                    <button onclick="deleteSession('${s.id}')" class="px-4 py-2 bg-amber-500/20 text-amber-700 font-bold rounded-xl text-xs active:scale-95 transition">คืนห้อง</button>
                 </div>
             `).join('');
         }
@@ -674,15 +573,15 @@
                 return;
             }
             container.innerHTML = logs.map(l => `
-                <tr class="hover:bg-slate-100/50 dark:hover:bg-white/5 transition">
-                    <td class="py-3 px-4 font-bold">${l.userName}</td>
-                    <td class="py-3 px-4"><span class="px-2 py-0.5 bg-sky-500/10 text-sky-600 rounded text-xs font-semibold">${l.room}</span></td>
+                <tr class="hover:bg-slate-100/60 transition">
+                    <td class="py-3 px-4 font-bold text-slate-800">${l.userName}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 bg-sky-500/10 text-sky-700 rounded text-xs font-semibold">${l.room}</span></td>
                     <td class="py-3 px-4 text-emerald-600 font-medium">${l.purpose || '-'}</td>
-                    <td class="py-3 px-4 text-xs">${l.date}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${l.date}</td>
                     <td class="py-3 px-4 text-emerald-600 font-bold">${l.checkInTime || '-'}</td>
-                    <td class="py-3 px-4 text-rose-500 font-bold">${l.checkOutTime || '-'}</td>
-                    <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 rounded-full text-xs font-bold">🟢 สมบูรณ์</span></td>
-                    <td class="py-3 px-4 text-center"><button class="px-2.5 py-1 bg-slate-200 dark:bg-white/10 rounded-lg text-xs font-bold">👁️ ดู</button></td>
+                    <td class="py-3 px-4 text-rose-600 font-bold">${l.checkOutTime || '-'}</td>
+                    <td class="py-3 px-4 text-center"><span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-700 rounded-full text-xs font-bold">🟢 สมบูรณ์</span></td>
+                    <td class="py-3 px-4 text-center"><button class="px-2.5 py-1 bg-slate-200/80 text-slate-700 rounded-lg text-xs font-bold">👁️ ดู</button></td>
                 </tr>
             `).join('');
         }
