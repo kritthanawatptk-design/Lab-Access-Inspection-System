@@ -611,6 +611,17 @@
             });
 
             updateRoomDropdowns();
+
+            // 🌟 รองรับการสแกน QR Code เปลี่ยนห้องอัตโนมัติ
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomFromUrl = urlParams.get('room');
+            
+            if (roomFromUrl && roomsList.includes(roomFromUrl)) {
+                currentRoom = roomFromUrl;
+                document.getElementById('topRoomSelect').value = currentRoom;
+                renderRoomDashboard();
+                switchTab('checkin'); // เด้งไปหน้าเลือกชื่อทันที
+            }
         });
 
         function switchTab(tab) {
@@ -735,7 +746,7 @@
             }).join('');
         }
 
-        // 🌟 MODAL คืนห้อง: เปลี่ยน Default เป็น "ไม่ได้ใช้" (unused)
+        // 🌟 MODAL คืนห้อง: เซ็ตค่าเริ่มต้นครุภัณฑ์เป็น "ไม่ได้ใช้" (unused)
         window.openCheckoutModal = (sessionId, userName, roomName, purpose, checkInTime, checkInDate) => {
             activeCheckoutSession = { sessionId, userName, roomName, purpose, checkInTime, checkInDate };
             document.getElementById('modalUserName').innerText = userName;
@@ -752,7 +763,6 @@
                 equipContainer.innerHTML = `<p class="text-slate-400 text-xs italic py-2">ไม่มีรายการครุภัณฑ์บันทึกในห้องนี้ (สมบูรณ์ปกติ)</p>`;
             } else {
                 equipContainer.innerHTML = roomEquip.map(e => {
-                    // กำหนดสถานะเริ่มต้นเป็น 'unused' แทน 'normal'
                     equipmentStates[e.docId] = 'unused';
                     
                     return `
@@ -761,7 +771,6 @@
                                 <strong class="text-slate-800 text-xs sm:text-sm block leading-tight">${e.name}</strong>
                                 <span class="text-slate-400 text-[10px]">เลขครุภัณฑ์: ${e.assetId}</span>
                             </div>
-                            <!-- กลุ่ม 3 ปุ่ม: เซ็ตปุ่ม 'ไม่ได้ใช้' ให้สว่างเป็นค่าเริ่มต้น -->
                             <div class="flex space-x-1.5 w-full sm:w-auto" id="btnGroup-${e.docId}">
                                 <button type="button" onclick="setEquipState('${e.docId}', 'normal')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold transition-all">🟢 ปกติ</button>
                                 <button type="button" onclick="setEquipState('${e.docId}', 'issue')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold transition-all">🔴 ชำรุด</button>
@@ -774,17 +783,14 @@
             document.getElementById('checkoutModal').classList.remove('hidden');
         };
 
-        // 🌟 สลับสถานะของครุภัณฑ์ พร้อมไฮไลท์ปุ่มที่ถูกเลือก
         window.setEquipState = (equipId, state) => {
             equipmentStates[equipId] = state;
             const container = document.getElementById(`btnGroup-${equipId}`);
             
-            // รีเซ็ตคลาสเริ่มต้น (ปุ่มสีเทาที่ไม่ได้ถูกเลือก)
             let btnNormalClass = "bg-slate-200 text-slate-500";
             let btnIssueClass = "bg-slate-200 text-slate-500";
             let btnUnusedClass = "bg-slate-200 text-slate-500";
 
-            // ใส่สีให้ปุ่มที่ถูกคลิก
             if (state === 'normal') btnNormalClass = "bg-emerald-500 text-white shadow-sm ring-2 ring-emerald-300";
             else if (state === 'issue') btnIssueClass = "bg-rose-500 text-white shadow-sm ring-2 ring-rose-300";
             else if (state === 'unused') btnUnusedClass = "bg-slate-600 text-white shadow-sm ring-2 ring-slate-400";
