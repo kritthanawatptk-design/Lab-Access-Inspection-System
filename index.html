@@ -507,7 +507,11 @@
             "Washing & Cleaning Room (ห้องซักล้าง)"
         ];
         let roomsList = [...defaultRooms];
-        let currentRoom = roomsList[0];
+        
+        // 🌟 1. ตรวจจับค่าห้องจาก URL ทันทีตั้งแต่เริ่มต้นระบบ
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomFromUrl = urlParams.get('room');
+        let currentRoom = (roomFromUrl && roomsList.includes(roomFromUrl)) ? roomFromUrl : roomsList[0];
 
         // รายชื่อเจ้าหน้าที่ตั้งต้น
         const defaultUsers = [
@@ -612,15 +616,12 @@
 
             updateRoomDropdowns();
 
-            // 🌟 รองรับการสแกน QR Code เปลี่ยนห้องอัตโนมัติ
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomFromUrl = urlParams.get('room');
-            
+            // 🌟 2. หากมีค่าห้องจาก URL ให้ล็อกห้องและเปิดหน้า Check-in ทันที
             if (roomFromUrl && roomsList.includes(roomFromUrl)) {
                 currentRoom = roomFromUrl;
                 document.getElementById('topRoomSelect').value = currentRoom;
                 renderRoomDashboard();
-                switchTab('checkin'); // เด้งไปหน้าเลือกชื่อทันที
+                switchTab('checkin');
             }
         });
 
@@ -746,7 +747,6 @@
             }).join('');
         }
 
-        // 🌟 MODAL คืนห้อง: เซ็ตค่าเริ่มต้นครุภัณฑ์เป็น "ไม่ได้ใช้" (unused)
         window.openCheckoutModal = (sessionId, userName, roomName, purpose, checkInTime, checkInDate) => {
             activeCheckoutSession = { sessionId, userName, roomName, purpose, checkInTime, checkInDate };
             document.getElementById('modalUserName').innerText = userName;
