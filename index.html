@@ -735,7 +735,7 @@
             }).join('');
         }
 
-        // 🌟 MODAL คืนห้องที่แทรกปุ่มให้ครบ 3 ปุ่ม และจัดเรียงให้ดูดีเสมอ
+        // 🌟 MODAL คืนห้อง: เปลี่ยน Default เป็น "ไม่ได้ใช้" (unused)
         window.openCheckoutModal = (sessionId, userName, roomName, purpose, checkInTime, checkInDate) => {
             activeCheckoutSession = { sessionId, userName, roomName, purpose, checkInTime, checkInDate };
             document.getElementById('modalUserName').innerText = userName;
@@ -752,19 +752,20 @@
                 equipContainer.innerHTML = `<p class="text-slate-400 text-xs italic py-2">ไม่มีรายการครุภัณฑ์บันทึกในห้องนี้ (สมบูรณ์ปกติ)</p>`;
             } else {
                 equipContainer.innerHTML = roomEquip.map(e => {
-                    // กำหนดสถานะเริ่มต้นเป็นปกติ
-                    equipmentStates[e.docId] = 'normal';
+                    // กำหนดสถานะเริ่มต้นเป็น 'unused' แทน 'normal'
+                    equipmentStates[e.docId] = 'unused';
+                    
                     return `
                         <div class="glass-card p-3 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs gap-3">
                             <div class="flex-1">
                                 <strong class="text-slate-800 text-xs sm:text-sm block leading-tight">${e.name}</strong>
                                 <span class="text-slate-400 text-[10px]">เลขครุภัณฑ์: ${e.assetId}</span>
                             </div>
-                            <!-- กลุ่ม 3 ปุ่ม: ปกติ, ชำรุด, ไม่ได้ใช้ -->
+                            <!-- กลุ่ม 3 ปุ่ม: เซ็ตปุ่ม 'ไม่ได้ใช้' ให้สว่างเป็นค่าเริ่มต้น -->
                             <div class="flex space-x-1.5 w-full sm:w-auto" id="btnGroup-${e.docId}">
-                                <button type="button" onclick="setEquipState('${e.docId}', 'normal')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl bg-emerald-500 text-white font-bold shadow-sm transition-all">🟢 ปกติ</button>
+                                <button type="button" onclick="setEquipState('${e.docId}', 'normal')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold transition-all">🟢 ปกติ</button>
                                 <button type="button" onclick="setEquipState('${e.docId}', 'issue')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold transition-all">🔴 ชำรุด</button>
-                                <button type="button" onclick="setEquipState('${e.docId}', 'unused')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold transition-all">⚪ ไม่ได้ใช้</button>
+                                <button type="button" onclick="setEquipState('${e.docId}', 'unused')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl bg-slate-600 text-white font-bold shadow-sm ring-2 ring-slate-400 transition-all">⚪ ไม่ได้ใช้</button>
                             </div>
                         </div>
                     `;
