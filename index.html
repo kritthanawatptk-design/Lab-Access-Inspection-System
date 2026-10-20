@@ -509,6 +509,7 @@
         let roomsList = [...defaultRooms];
         let currentRoom = roomsList[0];
 
+        // รายชื่อเจ้าหน้าที่ตั้งต้น
         const defaultUsers = [
             { id: "LABPT-RMSC4-01", name: "ดร.ภัทรพล วงษ์ภูธร" },
             { id: "LABPT-RMSC4-02", name: "นายปัญญ์ปิยะ รอบคอบ" },
@@ -591,16 +592,22 @@
                 renderAdminEquipment();
             });
 
-            // 🌟 Realtime User Listener
+            // 🌟 Realtime User Listener (บังคับรวมคนเก่าด้วย Map ไม่ซ้ำ)
             onSnapshot(collection(db, "users"), (snapshot) => {
                 const dbUsers = [];
                 snapshot.forEach(doc => dbUsers.push({ docId: doc.id, ...doc.data() }));
                 
-                if (dbUsers.length === 0) {
-                    allUsersData = [...defaultUsers];
-                } else {
-                    allUsersData = [...dbUsers];
-                }
+                const userMap = new Map();
+                // 1. ใส่ defaultUsers ก่อน
+                defaultUsers.forEach((u, idx) => {
+                    userMap.set(u.id, { docId: `temp-${idx}`, ...u });
+                });
+                // 2. เอาข้อมูลจาก Firestore ทับหรือเพิ่มต่อ
+                dbUsers.forEach(u => {
+                    userMap.set(u.id, u);
+                });
+
+                allUsersData = Array.from(userMap.values());
 
                 renderUsers(allUsersData);
                 renderAdminUsers(allUsersData);
@@ -731,7 +738,6 @@
             }).join('');
         }
 
-        // 🌟 เปิด MODAL คืนห้อง (ปรับเพิ่มตัวเลือก "⚪ ไม่ได้ใช้งาน")
         window.openCheckoutModal = (sessionId, userName, roomName, purpose, checkInTime, checkInDate) => {
             activeCheckoutSession = { sessionId, userName, roomName, purpose, checkInTime, checkInDate };
             document.getElementById('modalUserName').innerText = userName;
@@ -767,7 +773,6 @@
             document.getElementById('checkoutModal').classList.remove('hidden');
         };
 
-        // 🌟 ปรับปรุงการสลับสถานะครุภัณฑ์ (รองรับ unused)
         window.setEquipState = (equipId, state) => {
             equipmentStates[equipId] = state;
             const container = document.getElementById(`btnGroup-${equipId}`);
@@ -900,7 +905,6 @@
             window.currentSortedLogs = sortedLogs;
         }
 
-        // 🌟 แสดงรายละเอียดครุภัณฑ์ใน Modal (รวมสถานะ unused)
         window.viewLogDetail = (index) => {
             const log = window.currentSortedLogs[index];
             if(!log) return;
@@ -950,7 +954,6 @@
             document.getElementById('logDetailsModal').classList.remove('hidden');
         };
 
-        // 🌟 ส่งออกไฟล์ Excel
         function exportLogsToExcel() {
             if(!allLogsData || allLogsData.length === 0) {
                 alert("ไม่มีข้อมูลประวัติสำหรับส่งออก");
