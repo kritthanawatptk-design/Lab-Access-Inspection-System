@@ -592,23 +592,20 @@
                 renderAdminEquipment();
             });
 
-            // 🌟 Realtime User Listener (บังคับรวมคนเก่าด้วย Map ไม่ซ้ำ)
+            // 🌟 Realtime User Listener
             onSnapshot(collection(db, "users"), (snapshot) => {
                 const dbUsers = [];
                 snapshot.forEach(doc => dbUsers.push({ docId: doc.id, ...doc.data() }));
                 
                 const userMap = new Map();
-                // 1. ใส่ defaultUsers ก่อน
                 defaultUsers.forEach((u, idx) => {
                     userMap.set(u.id, { docId: `temp-${idx}`, ...u });
                 });
-                // 2. เอาข้อมูลจาก Firestore ทับหรือเพิ่มต่อ
                 dbUsers.forEach(u => {
                     userMap.set(u.id, u);
                 });
 
                 allUsersData = Array.from(userMap.values());
-
                 renderUsers(allUsersData);
                 renderAdminUsers(allUsersData);
             });
@@ -738,6 +735,7 @@
             }).join('');
         }
 
+        // 🌟 MODAL คืนห้องที่แทรกปุ่มให้ครบ 3 ปุ่ม และจัดเรียงให้ดูดีเสมอ
         window.openCheckoutModal = (sessionId, userName, roomName, purpose, checkInTime, checkInDate) => {
             activeCheckoutSession = { sessionId, userName, roomName, purpose, checkInTime, checkInDate };
             document.getElementById('modalUserName').innerText = userName;
@@ -754,17 +752,19 @@
                 equipContainer.innerHTML = `<p class="text-slate-400 text-xs italic py-2">ไม่มีรายการครุภัณฑ์บันทึกในห้องนี้ (สมบูรณ์ปกติ)</p>`;
             } else {
                 equipContainer.innerHTML = roomEquip.map(e => {
+                    // กำหนดสถานะเริ่มต้นเป็นปกติ
                     equipmentStates[e.docId] = 'normal';
                     return `
-                        <div class="glass-card p-3 rounded-2xl flex items-center justify-between text-xs flex-wrap gap-2">
-                            <div>
-                                <strong class="text-slate-800 text-xs sm:text-sm block">${e.name}</strong>
-                                <span class="text-slate-400">เลขครุภัณฑ์: ${e.assetId}</span>
+                        <div class="glass-card p-3 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs gap-3">
+                            <div class="flex-1">
+                                <strong class="text-slate-800 text-xs sm:text-sm block leading-tight">${e.name}</strong>
+                                <span class="text-slate-400 text-[10px]">เลขครุภัณฑ์: ${e.assetId}</span>
                             </div>
-                            <div class="flex space-x-1" id="btnGroup-${e.docId}">
-                                <button type="button" onclick="setEquipState('${e.docId}', 'normal')" class="px-2.5 py-1.5 rounded-xl bg-emerald-500 text-white font-bold shadow-sm">🟢 ปกติ</button>
-                                <button type="button" onclick="setEquipState('${e.docId}', 'issue')" class="px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold">🔴 ชำรุด</button>
-                                <button type="button" onclick="setEquipState('${e.docId}', 'unused')" class="px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold">⚪ ไม่ได้ใช้</button>
+                            <!-- กลุ่ม 3 ปุ่ม: ปกติ, ชำรุด, ไม่ได้ใช้ -->
+                            <div class="flex space-x-1.5 w-full sm:w-auto" id="btnGroup-${e.docId}">
+                                <button type="button" onclick="setEquipState('${e.docId}', 'normal')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl bg-emerald-500 text-white font-bold shadow-sm transition-all">🟢 ปกติ</button>
+                                <button type="button" onclick="setEquipState('${e.docId}', 'issue')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold transition-all">🔴 ชำรุด</button>
+                                <button type="button" onclick="setEquipState('${e.docId}', 'unused')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold transition-all">⚪ ไม่ได้ใช้</button>
                             </div>
                         </div>
                     `;
@@ -773,21 +773,25 @@
             document.getElementById('checkoutModal').classList.remove('hidden');
         };
 
+        // 🌟 สลับสถานะของครุภัณฑ์ พร้อมไฮไลท์ปุ่มที่ถูกเลือก
         window.setEquipState = (equipId, state) => {
             equipmentStates[equipId] = state;
             const container = document.getElementById(`btnGroup-${equipId}`);
+            
+            // รีเซ็ตคลาสเริ่มต้น (ปุ่มสีเทาที่ไม่ได้ถูกเลือก)
             let btnNormalClass = "bg-slate-200 text-slate-500";
             let btnIssueClass = "bg-slate-200 text-slate-500";
             let btnUnusedClass = "bg-slate-200 text-slate-500";
 
-            if (state === 'normal') btnNormalClass = "bg-emerald-500 text-white shadow-sm";
-            else if (state === 'issue') btnIssueClass = "bg-rose-500 text-white shadow-sm";
-            else if (state === 'unused') btnUnusedClass = "bg-slate-600 text-white shadow-sm";
+            // ใส่สีให้ปุ่มที่ถูกคลิก
+            if (state === 'normal') btnNormalClass = "bg-emerald-500 text-white shadow-sm ring-2 ring-emerald-300";
+            else if (state === 'issue') btnIssueClass = "bg-rose-500 text-white shadow-sm ring-2 ring-rose-300";
+            else if (state === 'unused') btnUnusedClass = "bg-slate-600 text-white shadow-sm ring-2 ring-slate-400";
 
             container.innerHTML = `
-                <button type="button" onclick="setEquipState('${equipId}', 'normal')" class="px-2.5 py-1.5 rounded-xl ${btnNormalClass} font-bold">🟢 ปกติ</button>
-                <button type="button" onclick="setEquipState('${equipId}', 'issue')" class="px-2.5 py-1.5 rounded-xl ${btnIssueClass} font-bold">🔴 ชำรุด</button>
-                <button type="button" onclick="setEquipState('${equipId}', 'unused')" class="px-2.5 py-1.5 rounded-xl ${btnUnusedClass} font-bold">⚪ ไม่ได้ใช้</button>
+                <button type="button" onclick="setEquipState('${equipId}', 'normal')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl ${btnNormalClass} font-bold transition-all">🟢 ปกติ</button>
+                <button type="button" onclick="setEquipState('${equipId}', 'issue')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl ${btnIssueClass} font-bold transition-all">🔴 ชำรุด</button>
+                <button type="button" onclick="setEquipState('${equipId}', 'unused')" class="flex-1 sm:flex-none px-2.5 py-1.5 rounded-xl ${btnUnusedClass} font-bold transition-all">⚪ ไม่ได้ใช้</button>
             `;
         };
 
