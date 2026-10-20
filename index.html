@@ -508,10 +508,24 @@
         ];
         let roomsList = [...defaultRooms];
         
-        // 🌟 1. ตรวจจับค่าห้องจาก URL ทันทีตั้งแต่เริ่มต้นระบบ
+        // 🌟 Map รหัสตัวเลข ?r=1 ถึง 6 ให้ตรงกับชื่อห้อง
+        const roomCodeMap = {
+            "1": defaultRooms[0],
+            "2": defaultRooms[1],
+            "3": defaultRooms[2],
+            "4": defaultRooms[3],
+            "5": defaultRooms[4],
+            "6": defaultRooms[5]
+        };
+
         const urlParams = new URLSearchParams(window.location.search);
-        const roomFromUrl = urlParams.get('room');
-        let currentRoom = (roomFromUrl && roomsList.includes(roomFromUrl)) ? roomFromUrl : roomsList[0];
+        const rParam = urlParams.get('r');
+        
+        let initialRoom = defaultRooms[0];
+        if (rParam && roomCodeMap[rParam]) {
+            initialRoom = roomCodeMap[rParam];
+        }
+        let currentRoom = initialRoom;
 
         // รายชื่อเจ้าหน้าที่ตั้งต้น
         const defaultUsers = [
@@ -616,9 +630,8 @@
 
             updateRoomDropdowns();
 
-            // 🌟 2. หากมีค่าห้องจาก URL ให้ล็อกห้องและเปิดหน้า Check-in ทันที
-            if (roomFromUrl && roomsList.includes(roomFromUrl)) {
-                currentRoom = roomFromUrl;
+            // หากสแกน QR Code เข้ามาทาง ?r=1-6 ให้ล็อกห้องและเปิดหน้า Check-in ทันที
+            if (rParam && roomCodeMap[rParam]) {
                 document.getElementById('topRoomSelect').value = currentRoom;
                 renderRoomDashboard();
                 switchTab('checkin');
