@@ -185,7 +185,6 @@
                         <h3 class="font-bold text-sm sm:text-base flex items-center text-slate-800"><i class="fa-solid fa-rectangle-list text-sky-500 mr-2.5"></i>ประวัติการเข้าใช้งาน & ตรวจเช็กห้อง</h3>
                         <p class="text-xs text-slate-500">ตรวจสอบรายละเอียดเวลาเข้า-ออก วัตถุประสงค์ และการรายงานครุภัณฑ์</p>
                     </div>
-                    <!-- ปุ่มดาวน์โหลด Excel -->
                     <button id="exportExcelBtn" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white rounded-2xl text-xs font-bold shadow-md transition flex items-center justify-center space-x-2 self-start sm:self-auto">
                         <i class="fa-solid fa-file-excel text-base"></i>
                         <span>ส่งออกไฟล์ Excel (.xlsx)</span>
@@ -510,7 +509,6 @@
         let roomsList = [...defaultRooms];
         let currentRoom = roomsList[0];
 
-        // 🌟 ดึงข้อมูลรายชื่อตั้งต้นมาเปิดใช้ในระบบ
         const defaultUsers = [
             { id: "LABPT-RMSC4-01", name: "ดร.ภัทรพล วงษ์ภูธร" },
             { id: "LABPT-RMSC4-02", name: "นายปัญญ์ปิยะ รอบคอบ" },
@@ -593,12 +591,11 @@
                 renderAdminEquipment();
             });
 
-            // 🌟 Realtime User Listener (ดึงคนเก่าขึ้นมาผสมผสานอัตโนมัติ)
+            // 🌟 Realtime User Listener
             onSnapshot(collection(db, "users"), (snapshot) => {
                 const dbUsers = [];
                 snapshot.forEach(doc => dbUsers.push({ docId: doc.id, ...doc.data() }));
                 
-                // ถ้ารายชื่อใน Firebase ยังว่างเปล่า จะรวมกับ defaultUsers เพื่อนำเสนอบนหน้าจัดการทันที
                 if (dbUsers.length === 0) {
                     allUsersData = [...defaultUsers];
                 } else {
@@ -734,6 +731,7 @@
             }).join('');
         }
 
+        // 🌟 เปิด MODAL คืนห้อง (ปรับเพิ่มตัวเลือก "⚪ ไม่ได้ใช้งาน")
         window.openCheckoutModal = (sessionId, userName, roomName, purpose, checkInTime, checkInDate) => {
             activeCheckoutSession = { sessionId, userName, roomName, purpose, checkInTime, checkInDate };
             document.getElementById('modalUserName').innerText = userName;
@@ -752,14 +750,15 @@
                 equipContainer.innerHTML = roomEquip.map(e => {
                     equipmentStates[e.docId] = 'normal';
                     return `
-                        <div class="glass-card p-3 rounded-2xl flex items-center justify-between text-xs">
+                        <div class="glass-card p-3 rounded-2xl flex items-center justify-between text-xs flex-wrap gap-2">
                             <div>
                                 <strong class="text-slate-800 text-xs sm:text-sm block">${e.name}</strong>
                                 <span class="text-slate-400">เลขครุภัณฑ์: ${e.assetId}</span>
                             </div>
                             <div class="flex space-x-1" id="btnGroup-${e.docId}">
-                                <button type="button" onclick="setEquipState('${e.docId}', 'normal')" class="px-3 py-1.5 rounded-xl bg-emerald-500 text-white font-bold shadow-sm">🟢 ปกติ</button>
-                                <button type="button" onclick="setEquipState('${e.docId}', 'issue')" class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold">🔴 ชำรุด</button>
+                                <button type="button" onclick="setEquipState('${e.docId}', 'normal')" class="px-2.5 py-1.5 rounded-xl bg-emerald-500 text-white font-bold shadow-sm">🟢 ปกติ</button>
+                                <button type="button" onclick="setEquipState('${e.docId}', 'issue')" class="px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold">🔴 ชำรุด</button>
+                                <button type="button" onclick="setEquipState('${e.docId}', 'unused')" class="px-2.5 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold">⚪ ไม่ได้ใช้</button>
                             </div>
                         </div>
                     `;
@@ -768,20 +767,23 @@
             document.getElementById('checkoutModal').classList.remove('hidden');
         };
 
+        // 🌟 ปรับปรุงการสลับสถานะครุภัณฑ์ (รองรับ unused)
         window.setEquipState = (equipId, state) => {
             equipmentStates[equipId] = state;
             const container = document.getElementById(`btnGroup-${equipId}`);
-            if(state === 'normal') {
-                container.innerHTML = `
-                    <button type="button" onclick="setEquipState('${equipId}', 'normal')" class="px-3 py-1.5 rounded-xl bg-emerald-500 text-white font-bold shadow-sm">🟢 ปกติ</button>
-                    <button type="button" onclick="setEquipState('${equipId}', 'issue')" class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold">🔴 ชำรุด</button>
-                `;
-            } else {
-                container.innerHTML = `
-                    <button type="button" onclick="setEquipState('${equipId}', 'normal')" class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-500 font-bold">🟢 ปกติ</button>
-                    <button type="button" onclick="setEquipState('${equipId}', 'issue')" class="px-3 py-1.5 rounded-xl bg-rose-500 text-white font-bold shadow-sm">🔴 ชำรุด</button>
-                `;
-            }
+            let btnNormalClass = "bg-slate-200 text-slate-500";
+            let btnIssueClass = "bg-slate-200 text-slate-500";
+            let btnUnusedClass = "bg-slate-200 text-slate-500";
+
+            if (state === 'normal') btnNormalClass = "bg-emerald-500 text-white shadow-sm";
+            else if (state === 'issue') btnIssueClass = "bg-rose-500 text-white shadow-sm";
+            else if (state === 'unused') btnUnusedClass = "bg-slate-600 text-white shadow-sm";
+
+            container.innerHTML = `
+                <button type="button" onclick="setEquipState('${equipId}', 'normal')" class="px-2.5 py-1.5 rounded-xl ${btnNormalClass} font-bold">🟢 ปกติ</button>
+                <button type="button" onclick="setEquipState('${equipId}', 'issue')" class="px-2.5 py-1.5 rounded-xl ${btnIssueClass} font-bold">🔴 ชำรุด</button>
+                <button type="button" onclick="setEquipState('${equipId}', 'unused')" class="px-2.5 py-1.5 rounded-xl ${btnUnusedClass} font-bold">⚪ ไม่ได้ใช้</button>
+            `;
         };
 
         function closeCheckoutModal() {
@@ -898,6 +900,7 @@
             window.currentSortedLogs = sortedLogs;
         }
 
+        // 🌟 แสดงรายละเอียดครุภัณฑ์ใน Modal (รวมสถานะ unused)
         window.viewLogDetail = (index) => {
             const log = window.currentSortedLogs[index];
             if(!log) return;
@@ -928,13 +931,17 @@
             } else {
                 equipContainer.innerHTML = roomEquip.map(e => {
                     const st = equipStates[e.docId] || 'normal';
+                    let statusBadge = "🟢 สมบูรณ์ปกติ";
+                    if (st === 'issue') statusBadge = "🔴 ชำรุด/มีปัญหา";
+                    else if (st === 'unused') statusBadge = "⚪ ไม่ได้ใช้งาน";
+
                     return `
                         <div class="glass-card p-2.5 rounded-xl flex items-center justify-between text-xs">
                             <div>
                                 <strong class="text-slate-800">${e.name}</strong>
                                 <span class="text-slate-400 block text-[10px]">เลขครุภัณฑ์: ${e.assetId}</span>
                             </div>
-                            <span>${st === 'normal' ? '🟢 สมบูรณ์ปกติ' : '🔴 ชำรุด/มีปัญหา'}</span>
+                            <span class="font-bold">${statusBadge}</span>
                         </div>
                     `;
                 }).join('');
@@ -943,6 +950,7 @@
             document.getElementById('logDetailsModal').classList.remove('hidden');
         };
 
+        // 🌟 ส่งออกไฟล์ Excel
         function exportLogsToExcel() {
             if(!allLogsData || allLogsData.length === 0) {
                 alert("ไม่มีข้อมูลประวัติสำหรับส่งออก");
@@ -1040,7 +1048,6 @@
             }
         }
 
-        // 🌟 เพิ่ม / แก้ไข รายชื่อบุคลากร (Firestore & Fallback sync)
         async function saveUser() {
             const id = document.getElementById('newUserId').value.trim();
             const name = document.getElementById('newUserName').value.trim();
@@ -1049,10 +1056,8 @@
             try {
                 if (editingUserDocId) {
                     if(editingUserDocId.startsWith("temp-")) {
-                        // หากแก้ไขคนเก่าที่ยังไม่ได้อยู่ใน Firebase ให้สร้างใหม่ลง Firestore
                         await addDoc(collection(db, "users"), { id, name });
                     } else {
-                        // อัปเดตใน Firestore
                         await updateDoc(doc(db, "users", editingUserDocId), { id, name });
                     }
                     alert("อัปเดตข้อมูลผู้ใช้งานสำเร็จ");
@@ -1060,7 +1065,6 @@
                     document.getElementById('addNewUserBtn').innerText = "+ เพิ่ม/บันทึกบุคลากร";
                     document.getElementById('addNewUserBtn').className = "w-full bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded-xl font-bold transition";
                 } else {
-                    // เพิ่มใหม่ลง Firestore
                     await addDoc(collection(db, "users"), { id, name });
                     alert("เพิ่มผู้ใช้งานใหม่เรียบร้อยแล้ว");
                 }
@@ -1072,7 +1076,6 @@
             }
         }
 
-        // 🌟 แสดงรายชื่อบุคลากรทั้งหมดในหน้า Admin (รวมดึงคนเก่าขึ้นมาวาง)
         function renderAdminUsers(users) {
             const container = document.getElementById('adminUsersList');
             if(!container) return;
@@ -1120,12 +1123,10 @@
             if(confirm(`ยืนยันการลบคุณ "${name}" ออกจากระบบ?`)) {
                 try {
                     if (docId.startsWith("temp-")) {
-                        // หากเป็นข้อมูล Temp ให้ลบออกจากหน่วยความจำ local
                         allUsersData = allUsersData.filter(u => u.name !== name);
                         renderUsers(allUsersData);
                         renderAdminUsers(allUsersData);
                     } else {
-                        // หากอยู่ใน Firebase ให้ลบออกจาก Cloud
                         await deleteDoc(doc(db, "users", docId));
                     }
                     alert("ลบรายชื่อผู้ใช้งานสำเร็จ");
